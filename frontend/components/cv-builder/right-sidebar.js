@@ -152,15 +152,15 @@ export default function RightSidebar() {
                     const text = await file.text();
                     setResumeData({ ...resumeData, data: JSON.parse(text) });
                 } else if (file.name.endsWith(".docx")) {
-                    const mammoth = (await import("mammoth")).default;
                     const arrayBuffer = await file.arrayBuffer();
-                    const result = await mammoth.extractRawText({ arrayBuffer });
+                    const mammoth = (await import("mammoth")).default;
+                    const result = await mammoth.extractRawText({ arrayBuffer: arrayBuffer });
                     const parsed = parsePlainTextToCV(result.value);
                     setResumeData({ ...resumeData, data: parsed });
                 } else if (file.name.endsWith(".pdf")) {
-                    const pdfjsLib = await import("pdfjs-dist");
-                    pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
                     const arrayBuffer = await file.arrayBuffer();
+                    const pdfjsLib = await import("pdfjs-dist/legacy/build/pdf");
+                    pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js`;
                     const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
                     let text = "";
                     for (let i = 1; i <= pdf.numPages; i++) {
