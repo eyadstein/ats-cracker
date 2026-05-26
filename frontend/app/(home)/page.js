@@ -2,6 +2,8 @@
 import { motion, useMotionValue, useTransform, useSpring } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
 import Link from "next/link";
+import BaseModal from "@/components/auth/base-modal";
+import useAppContext from "@/hooks/useAppContext";
 
 const FEATURES = [
   { icon: "🎯", title: "ATS Score 96-100%", desc: "Our resume format is parsed perfectly by every major ATS system." },
@@ -83,7 +85,7 @@ function ResumeCard3D() {
         <div className="flex items-center gap-2 mb-5">
           <div className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-indigo-500 flex items-center justify-center text-white text-xs font-bold">E</div>
           <div>
-            <div className="text-white text-xs font-semibold">EyadStein</div>
+            <div className="text-white text-xs font-semibold">Eyadstein</div>
             <div className="text-violet-300 text-[10px]">Software Developer</div>
           </div>
           <div className="ml-auto bg-green-400/20 border border-green-400/40 rounded-full px-2 py-0.5 text-green-400 text-[9px] font-bold">ATS 98%</div>
@@ -117,9 +119,25 @@ function Particles() {
 }
 
 export default function HomePage() {
+  const { isAuthenticated } = useAppContext();
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
+
+  function handleBuildClick() {
+    if (!isAuthenticated) {
+      setIsLoginOpen(true);
+    }
+  }
+
   return (
     <main className="min-h-screen w-full overflow-x-hidden" style={{ background: "linear-gradient(135deg, #0f0c29 0%, #1a1040 40%, #0d1b4b 100%)" }}>
       <Particles />
+
+      <BaseModal
+        isOpen={isLoginOpen}
+        isLogin={true}
+        handleAuthAction={() => {}}
+        closeModal={() => setIsLoginOpen(false)}
+      />
 
       {/* Hero */}
       <section className="relative min-h-screen flex items-center justify-center px-6">
@@ -161,15 +179,26 @@ export default function HomePage() {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-              <Link href="/dashboard">
+              {isAuthenticated ? (
+                <Link href="/dashboard">
+                  <motion.button
+                    whileHover={{ scale: 1.05, boxShadow: "0 0 30px rgba(139,92,246,0.6)" }}
+                    whileTap={{ scale: 0.97 }}
+                    className="px-8 py-4 bg-gradient-to-r from-violet-600 to-indigo-600 text-white font-bold text-lg rounded-xl transition-all"
+                  >
+                    Build My Resume
+                  </motion.button>
+                </Link>
+              ) : (
                 <motion.button
+                  onClick={handleBuildClick}
                   whileHover={{ scale: 1.05, boxShadow: "0 0 30px rgba(139,92,246,0.6)" }}
                   whileTap={{ scale: 0.97 }}
                   className="px-8 py-4 bg-gradient-to-r from-violet-600 to-indigo-600 text-white font-bold text-lg rounded-xl transition-all"
                 >
                   Build My Resume
                 </motion.button>
-              </Link>
+              )}
               <Link href="/about">
                 <motion.button
                   whileHover={{ scale: 1.05 }}
@@ -266,15 +295,26 @@ export default function HomePage() {
         >
           <h2 className="text-4xl sm:text-5xl font-extrabold text-white mb-4">Ready to get hired?</h2>
           <p className="text-gray-400 text-lg mb-8">Build your ATS-optimized resume in minutes. Free forever.</p>
-          <Link href="/dashboard">
+          {isAuthenticated ? (
+            <Link href="/dashboard">
+              <motion.button
+                whileHover={{ scale: 1.05, boxShadow: "0 0 40px rgba(139,92,246,0.7)" }}
+                whileTap={{ scale: 0.97 }}
+                className="px-10 py-4 bg-gradient-to-r from-violet-600 to-indigo-600 text-white font-bold text-xl rounded-xl"
+              >
+                Start Building - It is Free
+              </motion.button>
+            </Link>
+          ) : (
             <motion.button
+              onClick={() => setIsLoginOpen(true)}
               whileHover={{ scale: 1.05, boxShadow: "0 0 40px rgba(139,92,246,0.7)" }}
               whileTap={{ scale: 0.97 }}
               className="px-10 py-4 bg-gradient-to-r from-violet-600 to-indigo-600 text-white font-bold text-xl rounded-xl"
             >
               Start Building - It is Free
             </motion.button>
-          </Link>
+          )}
         </motion.div>
       </section>
 
