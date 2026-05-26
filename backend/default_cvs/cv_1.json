@@ -1,0 +1,339 @@
+{
+  "name": "Alex Smith",
+  "position": "Lead Software Engineer",
+  "contactInformation": "+12345987654",
+  "email": "alexsmith@example.com",
+  "address": "Los Angeles, USA",
+  "socialMedia": [
+    {
+      "socialMedia": "Github",
+      "link": "https://github.com/alexsmith",
+      "displayName": "github.com/alexsmith"
+    },
+    {
+      "socialMedia": "LinkedIn",
+      "link": "https://www.linkedin.com/in/alexsmith",
+      "displayName": "linkedin.com/in/alexsmith"
+    }
+  ],
+  "summary": [
+    {
+      "text": "Lead Software Engineer with extensive experience in distributed systems, microservices, and cloud technologies. Proficient in Python, Go, and JavaScript, with a deep focus on building scalable and maintainable architectures.",
+      "isShownInPreview": true
+    },
+    {
+      "text": "Specialized in optimizing cloud-native applications, designing RESTful APIs, and working with containerized environments such as Docker and Kubernetes. Expertise in CI/CD pipelines, performance tuning, and cloud services management.",
+      "isShownInPreview": true
+    }
+  ],
+  "educations": [
+    {
+      "degree": "Master's Degree in Software Engineering",
+      "school": "Stanford University",
+      "startYear": "2022-09-01",
+      "endYear": "Ongoing",
+      "notes": "Courses: Cloud Computing, Machine Learning, Advanced Algorithms",
+      "isShownInPreview": true
+    },
+    {
+      "degree": "Bachelor's Degree in Computer Science",
+      "school": "University of California, Berkeley",
+      "startYear": "2015-09-01",
+      "endYear": "2019-05-01",
+      "notes": "Graduated with Honors",
+      "isShownInPreview": true
+    }
+  ],
+  "courses": [
+    {
+      "name": "Advanced Backend Systems",
+      "school": "Tech Academy",
+      "startYear": "2023-01-01",
+      "endYear": "2023-06-01",
+      "link": "https://www.techacademy.com/certificate/xyz789",
+      "notes": [
+        {
+          "text": "Technologies: Python, Django, PostgreSQL, Redis",
+          "isShownInPreview": true
+        },
+        {
+          "text": "Concepts: API Design, Data Caching, Horizontal Scaling",
+          "isShownInPreview": true
+        }
+      ],
+      "isShownInPreview": true
+    },
+    {
+      "name": "Cloud Infrastructure and DevOps",
+      "school": "Cloud Solutions Academy",
+      "startYear": "2022-08-01",
+      "endYear": "2023-02-01",
+      "link": "https://www.cloudsolutions.com/certificate/abc123",
+      "notes": [
+        {
+          "text": "Core Topics: AWS, CI/CD, Infrastructure as Code, Serverless Architecture",
+          "isShownInPreview": true
+        },
+        {
+          "text": "Skills: Terraform, Jenkins, Ansible, Docker Swarm",
+          "isShownInPreview": true
+        }
+      ],
+      "isShownInPreview": true
+    },
+    {
+      "name": "Full-Stack Web Development",
+      "school": "WebDev School",
+      "startYear": "2021-03-01",
+      "endYear": "2021-09-01",
+      "link": "https://www.webdevschool.com/certificate/def456",
+      "notes": [
+        {
+          "text": "Technologies: HTML5, CSS3, React, Node.js, MongoDB",
+          "isShownInPreview": true
+        },
+        {
+          "text": "Skills: REST APIs, WebSocket, Frontend Frameworks",
+          "isShownInPreview": true
+        }
+      ],
+      "isShownInPreview": true
+    }
+  ],
+  "skills": [
+    {
+      "title": "Programming Languages",
+      "skills": [
+        {
+          "text": "Go",
+          "isShownInPreview": true
+        },
+        {
+          "text": "JavaScript",
+          "isShownInPreview": true
+        },
+        {
+          "text": "Python",
+          "isShownInPreview": true
+        },
+        {
+          "text": "Ruby",
+          "isShownInPreview": true
+        }
+      ],
+      "isShownInPreview": true
+    },
+    {
+      "title": "Frameworks & Libraries",
+      "skills": [
+        {
+          "text": "Node.js",
+          "isShownInPreview": true
+        },
+        {
+          "text": "Django",
+          "isShownInPreview": true
+        },
+        {
+          "text": "React",
+          "isShownInPreview": true
+        },
+        {
+          "text": "Vue.js",
+          "isShownInPreview": true
+        },
+        {
+          "text": "Express.js",
+          "isShownInPreview": true
+        }
+      ],
+      "isShownInPreview": true
+    },
+    {
+      "title": "Cloud & DevOps",
+      "skills": [
+        {
+          "text": "AWS",
+          "isShownInPreview": true
+        },
+        {
+          "text": "Docker",
+          "isShownInPreview": true
+        },
+        {
+          "text": "Kubernetes",
+          "isShownInPreview": true
+        },
+        {
+          "text": "Terraform",
+          "isShownInPreview": true
+        }
+      ],
+      "isShownInPreview": true
+    },
+    {
+      "title": "Databases",
+      "skills": [
+        {
+          "text": "PostgreSQL",
+          "isShownInPreview": true
+        },
+        {
+          "text": "MySQL",
+          "isShownInPreview": true
+        },
+        {
+          "text": "MongoDB",
+          "isShownInPreview": true
+        },
+        {
+          "text": "Redis",
+          "isShownInPreview": true
+        }
+      ],
+      "isShownInPreview": true
+    },
+    {
+      "title": "Other Skills",
+      "skills": [
+        {
+          "text": "Git",
+          "isShownInPreview": true
+        },
+        {
+          "text": "Agile/Scrum",
+          "isShownInPreview": true
+        },
+        {
+          "text": "CI/CD",
+          "isShownInPreview": true
+        },
+        {
+          "text": "Unit Testing",
+          "isShownInPreview": true
+        }
+      ],
+      "isShownInPreview": true
+    }
+  ],
+  "languages": [
+    {
+      "title": "Arabic",
+      "level": "Native",
+      "isShownInPreview": true
+    },
+    {
+      "title": "English",
+      "level": "Very Good",
+      "isShownInPreview": true
+    }
+  ],
+  "workExperience": [
+    {
+      "company": "Company A",
+      "isShownInPreview": true,
+      "href": "https://www.example.com",
+      "position": "Senior Software Engineer",
+      "startYear": "2023-01-01",
+      "endYear": "2024-11-28",
+      "workType": "Remote",
+      "location": "City, Country",
+      "technologies": [
+        "Technology 1",
+        "Technology 2",
+        "Technology 3"
+      ],
+      "achievements": [
+        {
+          "text": "Developed and implemented new features",
+          "isShownInPreview": true
+        },
+        {
+          "text": "Optimized performance and scalability",
+          "isShownInPreview": true
+        },
+        {
+          "text": "Worked on a variety of projects",
+          "isShownInPreview": true
+        }
+      ]
+    },
+    {
+      "company": "Company B",
+      "href": "https://www.example.com",
+            "isShownInPreview": true,
+
+      "position": "Full-Stack Developer",
+      "startYear": "2021-01-01",
+      "endYear": "2022-12-31",
+      "workType": "On-site",
+      "location": "City, Country",
+      "technologies": [
+        "Technology 4",
+        "Technology 5",
+        "Technology 6"
+      ],
+      "achievements": [
+        {
+          "text": "Designed and built user interfaces",
+          "isShownInPreview": true
+        },
+        {
+          "text": "Developed backend services",
+          "isShownInPreview": true
+        },
+        {
+          "text": "Troubleshooted and resolved technical issues",
+          "isShownInPreview": true
+        }
+      ]
+    },
+    {
+      "company": "Company C",
+            "isShownInPreview": true,
+
+      "href": "https://www.example.com",
+      "position": "Software Engineer",
+      "startYear": "2019-01-01",
+      "endYear": "2020-12-31",
+      "workType": "Contract",
+      "location": "City, Country",
+      "technologies": [
+        "Technology 7",
+        "Technology 8",
+        "Technology 9"
+      ],
+      "achievements": [
+        {
+          "text": "Contributed to a large software project",
+          "isShownInPreview": true
+        },
+        {
+          "text": "Learned new technologies",
+          "isShownInPreview": true
+        },
+        {
+          "text": "Worked in a collaborative team environment",
+          "isShownInPreview": true
+        }
+      ]
+    }
+  ],
+  "titles": {
+    "profile": "PROFILE",
+    "experience": "EXPERIENCE",
+    "education": "EDUCATION",
+    "skills": "SKILLS",
+    "languages": "LANGUAGES",
+    "certification": "CERTIFICATION"
+  },
+  "order": [
+    "contactInformation",
+    "profile",
+    "workExperience",
+    "education",
+    "courses",
+    "skills",
+    "languages"
+  ]
+}

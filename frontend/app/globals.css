@@ -1,0 +1,26 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+  --greyWhite: #F0EEEB;
+  --primaryBlack: rgb(32,14,50);
+  --homeBackgroundColor: #F0EEEB;
+  --inputBackground: rgb(243,244,246);
+  --inputBorder: rgb(243,244,246);
+  --brandDarkBlue: rgb(0 18 80);
+  --specialSandLight: rgb(240 238 235);
+  --gradientPinkRed-from: #ec008c;
+  --gradientPinkRed-to: #fc6767;
+  --purple-500: #a855f7;
+  --blue-500: #3b82f6;
+}
+
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: Arial, Helvetica, sans-serif;
+}

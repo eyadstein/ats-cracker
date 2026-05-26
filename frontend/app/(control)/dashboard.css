@@ -1,0 +1,189 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+.dbpx {
+    padding-left: 1.5rem; /* Default for screens smaller than 768px */
+    padding-right: 1.5rem;
+}
+
+@media (min-width: 768px) {
+    .dbpx {
+        padding-left: 2.5rem;
+        padding-right: 2.5rem;
+    }
+}
+
+@media (min-width: 1024px) {
+    .dbpx {
+        padding-left: 3rem;
+        padding-right: 3rem;
+        padding-bottom: 1.5rem;
+    }
+}
+
+@media (min-width: 1280px) {
+    .dbpx {
+        padding-left: 3.5rem;
+        padding-right: 3.5rem;
+    }
+}
+
+@media (min-width: 640px) {
+    .dbpx {
+        padding-left: 2rem;
+        padding-right: 2rem;
+    }
+}
+
+body {
+    color: var(--foreground);
+    background: var(--background);
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.scrollbar-none {
+    scrollbar-width: none;
+}
+
+.imageContainer img {
+    width: 100%;
+    height: auto;
+}
+
+.w-24 {
+    width: 6rem;
+}
+
+.h-30 {
+    height: 7.5rem;
+}
+
+.sidebar {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+}
+
+.touch-manipulation {
+    touch-action: manipulation;
+}
+
+
+.name-cv{
+    font-size: 20px;
+    font-weight: 700;
+}
+.profession-cv{
+    font-size: 16px;
+    font-weight: 600;
+}
+.section-title{
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.sub-content{
+    font-size: 12px;
+    font-weight: 400;
+}
+
+.content{
+    font-size: 14px;
+    font-weight: 400;
+}
+
+.i-bold{
+    font-weight: 700 !important;
+}
+
+
+.ul-padding{
+    padding-inline-start: 0.9rem;
+}
+
+.ul-padding-none{
+    padding-inline-start: 0;
+}
+
+.hover-outline-list:hover {
+    outline-style: dashed;
+    outline-width: 2px;
+    outline-color: gray;
+}
+.outline-dragging {
+    outline-style: dashed;
+    outline-width: 2px;
+    outline-color: gray;
+    background-color: white;
+}
+
+
+.editable:empty:before {
+    content: attr(data-placeholder);
+    color: #999;
+}
+.editable:focus:empty:before {
+    content: "";
+}
+
+
+.editable:focus {
+    border: 1px solid #ccc;
+    padding: 0.5em;
+    outline: none;
+}
+
+.ql-indent-1 {
+    padding-left: 1em;
+}
+.ql-indent-2 {
+    padding-left: 2em;
+}
+.ql-indent-3 {
+    padding-left: 3em;
+}
+.ql-indent-4 {
+    padding-left: 4em;
+}
+.ql-indent-5 {
+    padding-left: 5em;
+}
+.ql-indent-6 {
+    padding-left: 6em;
+}
+.ql-indent-7 {
+    padding-left: 7em;
+}
+.ql-indent-8 {
+    padding-left: 8em;
+}
+strong {
+    font-weight: bold;
+}
+em {
+    font-style: italic;
+}
+br {
+    line-height: 0.6;
+}
+
+.ql-align-right {
+    text-align: right;
+}
+.ql-align-center {
+    text-align: center;
+}
+.ql-align-justify {
+    text-align: justify;
+    white-space: pre-line;
+}
+
+
+.text-sm-xs {
+    font-size: 0.8rem;
+}
+
+.list-disc {
+    list-style-type: disc;
+}

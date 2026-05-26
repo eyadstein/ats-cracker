@@ -1,0 +1,23 @@
+# Next.js and Django general exclusions
+node_modules/
+dist/
+build/
+.env*
+.vscode/
+.idea/
+*.log
+*.tmp
+*.bak
+*~
+env/
+# Next.js-specific exclusions
+.next/
+
+# Django-specific exclusions
+db.sqlite3
+*.db
+static/
+media/
+*.pyc
+__pycache__/
+test_*.py
