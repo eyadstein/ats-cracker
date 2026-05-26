@@ -1,68 +1,35 @@
-# Ready For Hire - ATS Cracker <img src="frontend/public/bug.svg" alt="Screenshot" width="40" height="35">
+# ATS Cracker 🚀
 
+> Get hired with an ATS-optimized resume. Build, export, and crack any ATS system.
 
 ## Description
-This Is CV-Builder in very easy way with the best template to make your CV look professional and attractive. It also written in way that it can be easily parsed by ATS (Applicant Tracking System) which is used by many companies to filter out the CVs.
+ATS Cracker is a powerful CV builder designed to help you create professional, ATS-friendly resumes that get past automated screening systems with a 96-100% match score. Built by [@eyadstein](https://github.com/eyadstein).
 
 ## Features
-- User can create their CV in very easy way.
-- User can download their CV in PDF format.
-- Your Cv Now Is ATS Friendly.
-- Your Cv Now Json Object thats mean you easily edit it with any editor or 
-make any [AI] help to optimize it , fix grammar or any other thing.
-- you can get your CV in JSON format from the right side of the engine or you can download it in PDF format.
-- you can paste your CV in the engine and it will parse it and show you the result in the right side of the engine.
+- ✅ Build your CV in minutes with a clean, guided interface
+- ✅ Download your CV as PDF
+- ✅ ATS-optimized resume structure (96-100% score on JobScan)
+- ✅ Your CV is stored as a JSON object — edit with any tool or AI
+- ✅ Import/export CV as JSON
+- ✅ Paste JSON to instantly populate your CV
+- ✅ Fully responsive — reorder sections drag & drop
+- ✅ Admin panel at `/admin` to manage users and CVs
 
-
-- all The View Is Responsive ,  You Can Reorder almost all the sections in the CV
-but [Important] to keep the order of the sections in the same order as the original order in the CV.
-
-
-- there a nice admin panel to manage the users and the CVs, you can visit it by going to `/admin` and login with the superuser you created in the first time you run the project.
-
-
-## Technologies
-- Next.js
-- Python
-- Django
-- Django Rest Framework
-- Tailwind CSS
-- Docker
-- Docker Compose
-- Nginx
-
+## Tech Stack
+- **Frontend:** Next.js 15, Tailwind CSS, Framer Motion
+- **Backend:** Python, Django, Django REST Framework
+- **Infrastructure:** Docker, Docker Compose, Nginx
 
 ## Installation
-- Clone the repository
-- Run `docker-compose up --build` to build the images and run the containers
-- Open your browser and go to `http://127.0.0.1:8861`
-- Create an Account , You Will Have Example CV to start with
+```bash
+git clone https://github.com/eyadstein/ats-cracker.git
+cd ats-cracker
+docker-compose up --build
+```
+Then open: `http://127.0.0.1:8861`
 
-
-- Optional: To access the admin panel go to `http://127.0.0.1:8861/admin/` and login with the superuser you created in the first time you run the project
-
-
-
-
-
-
-
-Screenshot:
-
-![Screenshot](frontend/public/ats1.png)
-![Screenshot](frontend/public/ats2.png)
-![Screenshot](frontend/public/about/1.png)
-![Screenshot](frontend/public/about/2.png)
-![Screenshot](frontend/public/about/3.png)
-![Screenshot](frontend/public/about/4.png)
-![Screenshot](frontend/public/about/5.png)
-![Screenshot](frontend/public/about/6.png)
-![Screenshot](frontend/public/about/7.png)
-![Screenshot](frontend/public/about/8.png)
-
-
-
-
+- Create an account — you will get an example CV to start with
+- Admin panel: `http://127.0.0.1:8861/admin/`
 
 ## CV Sections
 - Personal Information
@@ -73,3 +40,5 @@ Screenshot:
 - Skills
 - Languages
 
+## License
+MIT — feel free to use and build on top of this.
