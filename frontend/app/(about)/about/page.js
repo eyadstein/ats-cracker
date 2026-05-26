@@ -8,16 +8,11 @@ function Profile() {
                     E
                 </div>
                 <h2 className="text-3xl font-semibold mt-4">
-                    Eyad Stein <span className="text-xs">(Builder)</span>
+                    EyadStein <span className="text-xs">(Builder)</span>
                 </h2>
                 <p className="text-xl text-gray-400">Software Developer</p>
                 <div className="flex justify-center space-x-8 mt-2">
-                    
-                        href="https://github.com/eyadstein"
-                        className="text-blue-500 hover:text-blue-300"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                    >
+                    <a href="https://github.com/eyadstein" className="text-blue-500 hover:text-blue-300" target="_blank" rel="noopener noreferrer">
                         GitHub
                     </a>
                 </div>
@@ -32,40 +27,32 @@ export default async function AboutPage() {
             <h1 className="text-4xl font-bold mb-8 text-center">
                 ATS Cracker - Bypass ATS System with Avg 96-100% Score
             </h1>
-
-            <section className="bg-dark py-20">
+            <section className="py-20">
                 <div className="container flex md:flex-row gap-8">
                     <Profile/>
                     <div className="w-full md:w-2/3">
                         <section className="mb-8">
                             <div className="grid gap-8 md:grid-cols-2">
-                                <div className="overflow-hidden rounded-xl">
-                                    <img src="/ats2.png" alt="gallery image" className="w-full object-cover object-center"/>
+                                <div className="overflow-hidden rounded-xl border border-violet-500/20 bg-white/5 p-6 flex flex-col items-center justify-center text-center gap-3">
+                                    <div className="text-5xl">🎯</div>
+                                    <h3 className="text-violet-400 font-bold text-xl">ATS Score 96-100%</h3>
+                                    <p className="text-gray-400 text-sm">Our resume format passes every major ATS system with near-perfect scores, verified on JobScan and ResumeGo.</p>
                                 </div>
-                                <div className="overflow-hidden rounded-xl">
-                                    <img src="/ats1.png" alt="gallery image" className="w-full object-cover object-center"/>
+                                <div className="overflow-hidden rounded-xl border border-violet-500/20 bg-white/5 p-6 flex flex-col items-center justify-center text-center gap-3">
+                                    <div className="text-5xl">🤖</div>
+                                    <h3 className="text-violet-400 font-bold text-xl">AI-Ready JSON</h3>
+                                    <p className="text-gray-400 text-sm">Your CV is stored as a clean JSON object. Feed it to any AI model for instant grammar fixes, rewrites, or optimization.</p>
                                 </div>
                             </div>
                         </section>
 
-                        <p className="text-2xl font-bold mb-2 text-center">
-                            Results From <span> </span>
-                            <span>
-                                <a href="https://www.jobscan.co/" className="text-blue-500 hover:text-blue-300 underline" target="_blank" rel="noopener noreferrer">JobScan</a>
-                            </span>
-                            <span> and </span>
-                            <span>
-                                <a href="https://www.resumego.net/" className="text-blue-500 hover:text-blue-300 underline" target="_blank" rel="noopener noreferrer">ResumeGo</a>
-                            </span>
-                        </p>
-
                         <p className="text-2xl mb-4 text-center">
-                            Your CV is now a JSON Object <span className={"text-xs"}>[AI can optimize it for you] 👀</span>
+                            Your CV is now a JSON Object <span className="text-xs text-violet-400">[AI can optimize it for you]</span>
                         </p>
 
-                        <p className="text-xl font-semibold mb-12 text-center text-gray-200">
+                        <div className="text-xl font-semibold mb-12 text-center text-gray-200">
                             <span className="block text-3xl font-extrabold mb-4 text-violet-500">Features of ATS Cracker:</span>
-                            <div className="rounded-2xl p-6 shadow-lg">
+                            <div className="rounded-2xl p-6 shadow-lg border border-violet-500/10 bg-white/5">
                                 <ul className="list-none space-y-4 text-left pl-4">
                                     <li className="text-lg text-gray-300"><span className="font-bold text-violet-500">1-</span> Convert your CV to JSON object.</li>
                                     <li className="text-lg text-gray-300"><span className="font-bold text-violet-500">2-</span> Convert your JSON object to CV.</li>
@@ -75,7 +62,7 @@ export default async function AboutPage() {
                                     <li className="text-lg text-gray-300"><span className="font-bold text-violet-500">6-</span> Duplicate your CV via paste JSON object.</li>
                                 </ul>
                             </div>
-                        </p>
+                        </div>
 
                         <section className="mb-8">
                             <ImageViewer/>

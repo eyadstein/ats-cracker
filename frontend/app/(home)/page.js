@@ -1,6 +1,6 @@
 "use client";
 import { motion, useMotionValue, useTransform, useSpring } from "framer-motion";
-import { useRef, useEffect, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import Link from "next/link";
 
 const FEATURES = [
@@ -25,6 +25,27 @@ const RESUME_LINES = [
   { w: "55%", h: 2, color: "bg-violet-400/60", mt: 10 },
   { w: "90%", h: 2, color: "bg-white/15", mt: 3 },
   { w: "70%", h: 2, color: "bg-white/15", mt: 3 },
+];
+
+const FIXED_PARTICLES = [
+  { width: 8, height: 10, left: "12%", top: "20%" },
+  { width: 14, height: 13, left: "23%", top: "57%" },
+  { width: 13, height: 12, left: "38%", top: "9%" },
+  { width: 7, height: 15, left: "35%", top: "36%" },
+  { width: 10, height: 8, left: "65%", top: "55%" },
+  { width: 7, height: 14, left: "42%", top: "12%" },
+  { width: 8, height: 9, left: "91%", top: "20%" },
+  { width: 9, height: 12, left: "15%", top: "58%" },
+  { width: 6, height: 7, left: "26%", top: "14%" },
+  { width: 12, height: 6, left: "30%", top: "10%" },
+  { width: 12, height: 8, left: "6%", top: "28%" },
+  { width: 9, height: 13, left: "12%", top: "84%" },
+  { width: 9, height: 7, left: "5%", top: "52%" },
+  { width: 14, height: 15, left: "41%", top: "87%" },
+  { width: 13, height: 11, left: "20%", top: "46%" },
+  { width: 15, height: 6, left: "50%", top: "88%" },
+  { width: 7, height: 14, left: "54%", top: "53%" },
+  { width: 5, height: 5, left: "46%", top: "40%" },
 ];
 
 function ResumeCard3D() {
@@ -57,70 +78,52 @@ function ResumeCard3D() {
       transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
       className="relative w-72 h-96 rounded-2xl cursor-pointer select-none"
     >
-      {/* Glow behind card */}
-      <div className="absolute inset-0 rounded-2xl bg-violet-600/30 blur-2xl scale-110 animate-glow-pulse" />
-
-      {/* Card face */}
-      <div className="relative w-full h-full rounded-2xl border border-violet-500/30 bg-gradient-to-br from-[#1a1040]/90 to-[#0d1b4b]/90 backdrop-blur-xl p-6 shadow-glow-violet">
-        {/* Top badge */}
+      <div className="absolute inset-0 rounded-2xl bg-violet-600/30 blur-2xl scale-110" />
+      <div className="relative w-full h-full rounded-2xl border border-violet-500/30 bg-gradient-to-br from-[#1a1040]/90 to-[#0d1b4b]/90 backdrop-blur-xl p-6">
         <div className="flex items-center gap-2 mb-5">
           <div className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-indigo-500 flex items-center justify-center text-white text-xs font-bold">E</div>
           <div>
-            <div className="text-white text-xs font-semibold">Eyad Stein</div>
+            <div className="text-white text-xs font-semibold">EyadStein</div>
             <div className="text-violet-300 text-[10px]">Software Developer</div>
           </div>
           <div className="ml-auto bg-green-400/20 border border-green-400/40 rounded-full px-2 py-0.5 text-green-400 text-[9px] font-bold">ATS 98%</div>
         </div>
-
-        {/* Resume lines */}
         {RESUME_LINES.map((line, i) => (
           <div key={i} style={{ width: line.w, height: line.h, marginTop: line.mt }} className={`rounded-full ${line.color}`} />
         ))}
-
-        {/* Bottom shine */}
         <div className="absolute bottom-0 left-0 right-0 h-16 rounded-b-2xl bg-gradient-to-t from-violet-500/10 to-transparent" />
-
-        {/* 3D shine overlay */}
-        <div style={{ transform: "translateZ(20px)" }} className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/5 to-transparent pointer-events-none" />
       </div>
     </motion.div>
   );
 }
 
-function Particle({ style }) {
+function Particles() {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
+  if (!mounted) return null;
   return (
-    <motion.div
-      className="absolute rounded-full bg-violet-500/20"
-      style={style}
-      animate={{ y: [0, -30, 0], opacity: [0.2, 0.6, 0.2] }}
-      transition={{ duration: 4 + Math.random() * 4, repeat: Infinity, ease: "easeInOut", delay: Math.random() * 3 }}
-    />
+    <div className="fixed inset-0 pointer-events-none overflow-hidden">
+      {FIXED_PARTICLES.map((p, i) => (
+        <motion.div
+          key={i}
+          className="absolute rounded-full bg-violet-500/20"
+          style={{ width: p.width, height: p.height, left: p.left, top: p.top }}
+          animate={{ y: [0, -30, 0], opacity: [0.2, 0.6, 0.2] }}
+          transition={{ duration: 4 + (i % 4), repeat: Infinity, ease: "easeInOut", delay: i * 0.2 }}
+        />
+      ))}
+    </div>
   );
 }
-
-const PARTICLES = Array.from({ length: 18 }, (_, i) => ({
-  width: 4 + Math.random() * 12,
-  height: 4 + Math.random() * 12,
-  left: `${Math.random() * 100}%`,
-  top: `${Math.random() * 100}%`,
-}));
 
 export default function HomePage() {
   return (
     <main className="min-h-screen w-full overflow-x-hidden" style={{ background: "linear-gradient(135deg, #0f0c29 0%, #1a1040 40%, #0d1b4b 100%)" }}>
+      <Particles />
 
-      {/* Particles */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        {PARTICLES.map((p, i) => (
-          <Particle key={i} style={{ width: p.width, height: p.height, left: p.left, top: p.top }} />
-        ))}
-      </div>
-
-      {/* Hero Section */}
+      {/* Hero */}
       <section className="relative min-h-screen flex items-center justify-center px-6">
         <div className="max-w-7xl mx-auto w-full flex flex-col lg:flex-row items-center justify-between gap-16">
-
-          {/* Left: Text */}
           <motion.div
             className="flex-1 text-center lg:text-left"
             initial={{ opacity: 0, x: -60 }}
@@ -134,7 +137,7 @@ export default function HomePage() {
               className="inline-flex items-center gap-2 bg-violet-500/10 border border-violet-500/30 rounded-full px-4 py-1.5 text-violet-300 text-sm font-medium mb-6"
             >
               <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-              ATS Score 96–100% Guaranteed
+              ATS Score 96-100% Guaranteed
             </motion.div>
 
             <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold text-white leading-tight mb-6">
@@ -162,9 +165,9 @@ export default function HomePage() {
                 <motion.button
                   whileHover={{ scale: 1.05, boxShadow: "0 0 30px rgba(139,92,246,0.6)" }}
                   whileTap={{ scale: 0.97 }}
-                  className="px-8 py-4 bg-gradient-to-r from-violet-600 to-indigo-600 text-white font-bold text-lg rounded-xl shadow-glow-violet transition-all"
+                  className="px-8 py-4 bg-gradient-to-r from-violet-600 to-indigo-600 text-white font-bold text-lg rounded-xl transition-all"
                 >
-                  Build My Resume →
+                  Build My Resume
                 </motion.button>
               </Link>
               <Link href="/about">
@@ -178,14 +181,13 @@ export default function HomePage() {
               </Link>
             </div>
 
-            {/* Stats */}
             <motion.div
               className="flex gap-8 mt-12 justify-center lg:justify-start"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 1.2 }}
             >
-              {[["96–100%", "ATS Score"], ["JSON", "AI-Ready"], ["Free", "Forever"]].map(([val, label]) => (
+              {[["96-100%", "ATS Score"], ["JSON", "AI-Ready"], ["Free", "Forever"]].map(([val, label]) => (
                 <div key={label} className="text-center">
                   <div className="text-2xl font-extrabold text-white">{val}</div>
                   <div className="text-xs text-gray-400 mt-1">{label}</div>
@@ -194,7 +196,6 @@ export default function HomePage() {
             </motion.div>
           </motion.div>
 
-          {/* Right: 3D Card */}
           <motion.div
             className="flex-1 flex justify-center items-center"
             initial={{ opacity: 0, x: 60 }}
@@ -205,7 +206,6 @@ export default function HomePage() {
           </motion.div>
         </div>
 
-        {/* Scroll hint */}
         <motion.div
           className="absolute bottom-8 left-1/2 -translate-x-1/2 text-gray-500 text-xs flex flex-col items-center gap-2"
           animate={{ y: [0, 8, 0] }}
@@ -216,7 +216,7 @@ export default function HomePage() {
         </motion.div>
       </section>
 
-      {/* Features Section */}
+      {/* Features */}
       <section className="relative py-28 px-6">
         <div className="max-w-6xl mx-auto">
           <motion.div
@@ -243,7 +243,7 @@ export default function HomePage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: i * 0.1 }}
-                whileHover={{ y: -6, boxShadow: "0 0 30px rgba(139,92,246,0.2)" }}
+                whileHover={{ y: -6 }}
                 className="rounded-2xl border border-violet-500/20 bg-white/5 backdrop-blur-sm p-6 cursor-default transition-all"
               >
                 <div className="text-3xl mb-3">{f.icon}</div>
@@ -255,7 +255,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* CTA Section */}
+      {/* CTA */}
       <section className="relative py-24 px-6">
         <motion.div
           className="max-w-3xl mx-auto text-center rounded-3xl border border-violet-500/30 bg-gradient-to-br from-violet-900/30 to-indigo-900/20 backdrop-blur-sm p-16"
@@ -270,9 +270,9 @@ export default function HomePage() {
             <motion.button
               whileHover={{ scale: 1.05, boxShadow: "0 0 40px rgba(139,92,246,0.7)" }}
               whileTap={{ scale: 0.97 }}
-              className="px-10 py-4 bg-gradient-to-r from-violet-600 to-indigo-600 text-white font-bold text-xl rounded-xl shadow-glow-violet"
+              className="px-10 py-4 bg-gradient-to-r from-violet-600 to-indigo-600 text-white font-bold text-xl rounded-xl"
             >
-              Start Building — It is Free →
+              Start Building - It is Free
             </motion.button>
           </Link>
         </motion.div>
@@ -284,7 +284,7 @@ export default function HomePage() {
         <a href="https://github.com/eyadstein" className="text-violet-400 hover:text-violet-300 transition-colors">
           @eyadstein
         </a>{" "}
-        · ATS Cracker © 2026
+        · ATS Cracker 2026
       </footer>
     </main>
   );
