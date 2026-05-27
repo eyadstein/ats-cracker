@@ -15,6 +15,10 @@ INSTALLED_APPS = [
     "rest_framework",
     "rest_framework_simplejwt",
     "corsheaders",
+    "allauth",
+    "allauth.account",
+    "allauth.socialaccount",
+    "allauth.socialaccount.providers.github",
     "api",
     "auth_app",
 ]
@@ -25,6 +29,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "allauth.account.middleware.AccountMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
@@ -81,3 +86,24 @@ STATIC_ROOT = "/app/static"
 STATIC_URL = "/static/"
 MEDIA_ROOT = "/app/media"
 MEDIA_URL = "/media/"
+
+# Allauth
+SITE_ID = 1
+AUTHENTICATION_BACKENDS = [
+    "django.contrib.auth.backends.ModelBackend",
+    "allauth.account.auth_backends.AuthenticationBackend",
+]
+SOCIALACCOUNT_PROVIDERS = {
+    "github": {
+        "APP": {
+            "client_id": os.getenv("GITHUB_CLIENT_ID", ""),
+            "secret": os.getenv("GITHUB_CLIENT_SECRET", ""),
+            "key": ""
+        },
+        "SCOPE": ["user:email"],
+    }
+}
+SOCIALACCOUNT_AUTO_SIGNUP = True
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_USERNAME_REQUIRED = False
+FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3000")
