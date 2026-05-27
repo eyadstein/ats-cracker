@@ -159,8 +159,18 @@ export default function RightSidebar() {
                     setResumeData({ ...resumeData, data: parsed });
                 } else if (file.name.endsWith(".pdf")) {
                     const arrayBuffer = await file.arrayBuffer();
-                    const pdfjsLib = await import("pdfjs-dist/build/pdf.mjs");
-                    pdfjsLib.GlobalWorkerOptions.workerSrc = new URL("pdfjs-dist/build/pdf.worker.mjs", import.meta.url).toString();
+                    const pdfjsLib = await new Promise((resolve, reject) => {
+                        if (window.pdfjsLib) { resolve(window.pdfjsLib); return; }
+                        const script = document.createElement("script");
+                        script.src = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js";
+                        script.onload = () => {
+                            window.pdfjsLib.GlobalWorkerOptions.workerSrc =
+                                "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+                            resolve(window.pdfjsLib);
+                        };
+                        script.onerror = reject;
+                        document.head.appendChild(script);
+                    });
                     const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
                     let text = "";
                     for (let i = 1; i <= pdf.numPages; i++) {
@@ -217,6 +227,7 @@ export default function RightSidebar() {
         </div>
     );
 }
+
 
 
 
