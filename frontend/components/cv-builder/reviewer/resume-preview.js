@@ -36,15 +36,10 @@ function ResumeContainer({children}) {
 }
 
 export function ListContainer({children, cv, className, onClick}) {
-    // Target dimensions
     const targetWidth = 180;
     const targetHeight = 250;
-
-    // Original dimensions
     const originalWidth = 620;
     const originalHeight = 1136;
-
-    // Calculate scale to fit within the target container
     const scale = Math.min(targetWidth / originalWidth, targetHeight / originalHeight);
 
     return (
@@ -58,7 +53,6 @@ export function ListContainer({children, cv, className, onClick}) {
                     height: `${targetHeight}px`,
                     position: "relative",
                 }}>
-                {/* Inner scaled content */}
                 <div
                     style={{
                         width: `${originalWidth}px`,
@@ -74,22 +68,52 @@ export function ListContainer({children, cv, className, onClick}) {
                     {children}
                 </div>
             </div>
-            {/* CV Title */}
             <span className="mt-[10px] text-xs font-bold uppercase">{cv.title}</span>
         </div>
     );
 }
 
-export default ResumeContainer;
+// Simple Projects section component
+function ProjectsCv({ data, className }) {
+    const d = data?.data || data;
+    if (!d?.projects?.length) return null;
+    return (
+        <div className={className || ""}>
+            <div style={{ fontSize: "13pt", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: "6px", color: "#1a1040" }}>
+                {d.titles?.projects || "PROJECTS"}
+            </div>
+            {d.projects.map((p, i) => (
+                <div key={i} style={{ marginBottom: "10px" }}>
+                    <div style={{ fontWeight: 600, fontSize: "11.5pt" }}>{p.name}</div>
+                    {p.url && <div style={{ fontSize: "10pt", color: "#2563eb" }}>{p.url}</div>}
+                    {p.description && <div style={{ fontSize: "10.5pt", whiteSpace: "pre-wrap" }}>{p.description}</div>}
+                </div>
+            ))}
+        </div>
+    );
+}
 
-
-
+// Custom sections renderer
+function CustomSectionCv({ data, sectionKey, className }) {
+    const d = data?.data || data;
+    const section = d?.customSections?.find(s => s.key === sectionKey);
+    if (!section) return null;
+    return (
+        <div className={className || ""}>
+            <div style={{ fontSize: "13pt", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: "6px", color: "#1a1040" }}>
+                {section.title}
+            </div>
+            {section.items?.map((item, i) => (
+                <div key={i} style={{ fontSize: "10.5pt", marginBottom: "4px" }}>{item.description}</div>
+            ))}
+        </div>
+    );
+}
 
 export function ResumePreview({data,isListItemPreview=false}) {
     const contentRef = useRef(null);
     const {resumeData} = useAppContext();
     const cvData = isListItemPreview ? data : resumeData;
-
 
     const renderSections = () => {
         const sections = {
@@ -139,20 +163,29 @@ export function ResumePreview({data,isListItemPreview=false}) {
                     droppableId="languages"
                     type="LANGUAGES"
                 />
-            )
+            ),
+            projects: <ProjectsCv data={data} className="mt-2" />,
         };
-        return cvData.data.order.map(section => {
-            return sections[section] ? sections[section] : null;
-        });
+
+        // Add custom sections dynamically
+        if (cvData?.data?.customSections) {
+            cvData.data.customSections.forEach(s => {
+                sections[s.key] = <CustomSectionCv data={data} sectionKey={s.key} className="mt-2" />;
+            });
+        }
+
+        const order = cvData?.data?.order || ["contactInformation","profile","workExperience","education","courses","skills","languages"];
+        return order.map(section => sections[section] || null).filter(Boolean);
     };
+
     return <div id="resumePages">
         <ResumePage data={data} isListItemPreview={isListItemPreview} ref={contentRef}>
-            {renderSections(data,isListItemPreview)}
+            {renderSections()}
         </ResumePage>
     </div>
 }
 
-export  function ResumePreviewer({data}) {
+export function ResumePreviewer({data}) {
     return (
         <ResumeContainer>
             <ResumePreview data={data}/>

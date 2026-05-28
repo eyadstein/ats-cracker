@@ -7,6 +7,9 @@ export default function ErrorPage({ error, reset }) {
         if (error) console.error("App error:", error);
     }, [error]);
 
+    const statusCode = error?.digest || error?.statusCode || "";
+    const message = error?.message || "Something went wrong";
+
     return (
         <div className="fixed inset-0 flex items-center justify-center px-6"
             style={{ background: "linear-gradient(135deg, #0f0c29 0%, #1a1040 40%, #0d1b4b 100%)" }}>
@@ -23,13 +26,16 @@ export default function ErrorPage({ error, reset }) {
                 <div className="inline-flex items-center gap-2 bg-violet-500/10 border border-violet-500/30 rounded-full px-4 py-1.5 mb-4">
                     <span className="w-2 h-2 rounded-full bg-red-400 animate-pulse"/>
                     <span className="text-violet-300 text-sm font-medium">
-                        {error?.message ? `Error: ${error.message}` : "Something went wrong"}
+                        {statusCode ? `Error ${statusCode}` : "Application Error"}
                     </span>
                 </div>
 
                 <h1 className="text-white text-5xl font-extrabold mb-3">Oops!</h1>
-                <p className="text-gray-400 text-lg mb-8">
-                    Something broke on our end. Your resume data is safe.
+                <p className="text-gray-400 text-lg mb-2">
+                    {message}
+                </p>
+                <p className="text-gray-500 text-sm mb-8">
+                    Your resume data is safe. Try refreshing or go back to the dashboard.
                 </p>
 
                 <div className="flex flex-col sm:flex-row gap-3 justify-center">

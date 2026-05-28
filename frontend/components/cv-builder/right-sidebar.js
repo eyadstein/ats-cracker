@@ -1,6 +1,6 @@
 "use client";
 import CircularButton from "@/components/general/circle-btn";
-import {FaDownload, FaCopy, FaUpload, FaPaste, FaSyncAlt, FaFileWord, FaFilePdf} from "react-icons/fa";
+import {FaDownload, FaCopy, FaUpload, FaPaste, FaSyncAlt, FaFileWord, FaFilePdf, FaPlus} from "react-icons/fa";
 import useAppContext from "@/hooks/useAppContext";
 import {DownloadIcon} from "@/components/svgs/svgs";
 import { useState } from "react";
@@ -13,11 +13,10 @@ function parsePlainTextToCV(rawText) {
         name: "", position: "", contactInformation: "", email: "", address: "",
         socialMedia: [], summary: [], educations: [], courses: [],
         workExperience: [], projects: [], skills: [], languages: [],
-        titles: { profile:"PROFILE", experience:"EXPERIENCE", education:"EDUCATION", certification:"CERTIFICATION", skills:"SKILLS", languages:"LANGUAGES" },
+        titles: { profile:"PROFILE", experience:"EXPERIENCE", education:"EDUCATION", certification:"CERTIFICATION", skills:"SKILLS", languages:"LANGUAGES", projects:"PROJECTS" },
         order: ["contactInformation","profile","workExperience","education","courses","skills","languages","projects"]
     };
 
-    // Extract contact info
     const emailMatch = full.match(/[\w.+-]+@[\w.-]+\.\w{2,}/);
     if (emailMatch) cv.email = emailMatch[0];
 
@@ -30,7 +29,6 @@ function parsePlainTextToCV(rawText) {
     const cityMatch = full.match(/\b([A-Z][a-z]+(?:,\s*[A-Z][a-z]+)*(?:,\s*[A-Z]{2,})?)\b/);
     if (cityMatch && cityMatch[0].length < 40) cv.address = cityMatch[0];
 
-    // Section detection
     const SECTIONS = [
         { key: "summary",        re: /^(profile|summary|about|objective|about me|professional summary)$/i },
         { key: "experience",     re: /^(experience|work experience|employment|professional experience|work history|career)$/i },
@@ -45,14 +43,12 @@ function parsePlainTextToCV(rawText) {
     const isDateRange = (line) => /\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec|\d{4}|present|current|now|to)\b/i.test(line);
     const isShortHeader = (line) => line.length < 80 && !line.endsWith(".") && !line.includes("@");
 
-    // Find name: first non-email non-phone line under 60 chars
     for (let i = 0; i < Math.min(4, lines.length); i++) {
         if (!lines[i].match(/[@\d{6,}|http|www]/i) && lines[i].length < 60) {
             cv.name = lines[i]; break;
         }
     }
 
-    // Find position: next short line after name that is not contact info
     for (let i = 1; i < Math.min(6, lines.length); i++) {
         const l = lines[i];
         if (l !== cv.name && !l.match(/[@\+\d{5,}]/) && l.length < 80 && !isSectionHeader(l)) {
@@ -60,7 +56,6 @@ function parsePlainTextToCV(rawText) {
         }
     }
 
-    // Parse sections
     let currentSection = null;
     let buffer = [];
 
@@ -158,12 +153,30 @@ export default function RightSidebar() {
     const {resumeData, setResumeData, syncResumeData} = useAppContext();
     const [loading, setLoading] = useState(false);
 
+    const safeSetResume = (newData) => {
+        const safe = {
+            name: newData.name || "", position: newData.position || "",
+            email: newData.email || "", contactInformation: newData.contactInformation || "",
+            address: newData.address || "", socialMedia: newData.socialMedia || [],
+            summary: newData.summary || [], educations: newData.educations || [],
+            courses: newData.courses || [], workExperience: newData.workExperience || [],
+            projects: newData.projects || [], skills: newData.skills || [],
+            languages: newData.languages || [],
+            titles: newData.titles || { profile:"PROFILE", experience:"EXPERIENCE", education:"EDUCATION", certification:"CERTIFICATION", skills:"SKILLS", languages:"LANGUAGES", projects:"PROJECTS" },
+            order: newData.order || ["contactInformation","profile","workExperience","education","courses","skills","languages"],
+        };
+        const updated = { ...resumeData, data: safe };
+        setResumeData(updated);
+        return updated;
+    };
+
     const downloadAsJson = () => {
         const el = document.createElement("a");
         el.href = URL.createObjectURL(new Blob([JSON.stringify(resumeData.data)], {type: "application/json"}));
         el.download = `resume-${resumeData.title}.json`;
         document.body.appendChild(el);
         el.click();
+        document.body.removeChild(el);
     };
 
     const downloadAsWord = async () => {
@@ -171,137 +184,198 @@ export default function RightSidebar() {
         try {
             const {
                 Document, Packer, Paragraph, TextRun, HeadingLevel,
-                AlignmentType, BorderStyle, ShadingType, Table, TableRow, TableCell, WidthType
+                AlignmentType, BorderStyle, Table, TableRow, TableCell, WidthType
             } = await import("docx");
             const d = resumeData.data;
             const children = [];
 
             const sectionHeader = (text) => new Paragraph({
-                children: [new TextRun({ text, bold: true, size: 24, color: "000000" })],
-                border: { bottom: { color: "888888", style: BorderStyle.SINGLE, size: 6 } },
-                spacing: { before: 280, after: 100 },
+                children: [new TextRun({ text, bold: true, size: 24, color: "1a1040", font: "Calibri" })],
+                border: { bottom: { color: "8b5cf6", style: BorderStyle.SINGLE, size: 12 } },
+                spacing: { before: 300, after: 120 },
             });
 
-            const bullet = (text) => new Paragraph({
-                children: [new TextRun({ text: `• ${text}`, size: 20 })],
+            const bulletPara = (text) => new Paragraph({
+                children: [new TextRun({ text: `• ${text}`, size: 20, font: "Calibri" })],
+                spacing: { after: 80, before: 40 },
+                indent: { left: 360 },
+            });
+
+            const normalPara = (text, opts = {}) => new Paragraph({
+                children: [new TextRun({ text, size: 20, font: "Calibri", ...opts })],
                 spacing: { after: 60 },
             });
 
-            // Name
+            // HEADER: Name + Position
             children.push(new Paragraph({
-                children: [new TextRun({ text: d.name || "", bold: true, size: 36 })],
+                children: [new TextRun({ text: d.name || "", bold: true, size: 48, color: "1a1040", font: "Calibri" })],
                 alignment: AlignmentType.CENTER,
+                spacing: { after: 80 },
             }));
-            // Position
             if (d.position) children.push(new Paragraph({
-                children: [new TextRun({ text: d.position, size: 24, color: "555555" })],
+                children: [new TextRun({ text: d.position, size: 24, color: "6366f1", font: "Calibri" })],
                 alignment: AlignmentType.CENTER,
-                spacing: { after: 60 },
-            }));
-            // Contact line
-            const contactParts = [d.email, d.contactInformation, d.address].filter(Boolean);
-            if (contactParts.length) children.push(new Paragraph({
-                children: [new TextRun({ text: contactParts.join("  |  "), size: 18, color: "777777" })],
-                alignment: AlignmentType.CENTER,
-                spacing: { after: 200 },
+                spacing: { after: 120 },
             }));
 
-            // Summary
-            if (d.summary?.length) {
-                children.push(sectionHeader("PROFILE"));
-                d.summary.forEach(s => s.description && children.push(new Paragraph({
-                    children: [new TextRun({ text: s.description, size: 20 })],
-                    spacing: { after: 60 },
-                })));
-            }
+            // Contact row as table for perfect alignment
+            const contactParts = [];
+            if (d.email) contactParts.push(d.email);
+            if (d.contactInformation) contactParts.push(d.contactInformation);
+            if (d.address) contactParts.push(d.address);
+            if (d.socialMedia?.length) contactParts.push(...d.socialMedia.map(s => s.url));
 
-            // Experience
-            if (d.workExperience?.length) {
-                children.push(sectionHeader("EXPERIENCE"));
-                d.workExperience.forEach(w => {
-                    if (w.position || w.company) children.push(new Paragraph({
-                        children: [
-                            new TextRun({ text: w.position || "", bold: true, size: 22 }),
-                            new TextRun({ text: w.company ? `  —  ${w.company}` : "", size: 22, color: "444444" }),
-                        ],
-                        spacing: { before: 120, after: 40 },
-                    }));
-                    const dateStr = [w.startDate, w.endDate].filter(Boolean).join(" - ");
-                    if (dateStr) children.push(new Paragraph({
-                        children: [new TextRun({ text: dateStr, size: 18, color: "888888", italics: true })],
-                        spacing: { after: 60 },
-                    }));
-                    if (w.description) {
-                        w.description.split(/\n|•/).map(s => s.trim()).filter(Boolean)
-                            .forEach(line => children.push(bullet(line)));
-                    }
-                    children.push(new Paragraph({ text: "" }));
-                });
-            }
-
-            // Education
-            if (d.educations?.length) {
-                children.push(sectionHeader("EDUCATION"));
-                d.educations.forEach(e => {
-                    if (e.degree || e.school) children.push(new Paragraph({
-                        children: [
-                            new TextRun({ text: e.degree || "", bold: true, size: 22 }),
-                            new TextRun({ text: e.school ? `  —  ${e.school}` : "", size: 22, color: "444444" }),
-                        ],
-                        spacing: { before: 120, after: 40 },
-                    }));
-                    const dateStr = [e.startDate, e.endDate].filter(Boolean).join(" - ");
-                    if (dateStr) children.push(new Paragraph({
-                        children: [new TextRun({ text: dateStr, size: 18, color: "888888", italics: true })],
-                        spacing: { after: 100 },
-                    }));
-                });
-            }
-
-            // Projects
-            if (d.projects?.length) {
-                children.push(sectionHeader("PROJECTS"));
-                d.projects.forEach(p => {
-                    if (p.name) children.push(new Paragraph({
-                        children: [new TextRun({ text: p.name, bold: true, size: 22 })],
-                        spacing: { before: 120, after: 40 },
-                    }));
-                    if (p.description) children.push(bullet(p.description));
-                    if (p.url) children.push(new Paragraph({
-                        children: [new TextRun({ text: p.url, size: 18, color: "2563eb" })],
-                        spacing: { after: 80 },
-                    }));
-                });
-            }
-
-            // Courses
-            if (d.courses?.length) {
-                children.push(sectionHeader("CERTIFICATIONS"));
-                d.courses.forEach(c => c.name && children.push(bullet(c.name)));
-            }
-
-            // Skills
-            if (d.skills?.length) {
-                children.push(sectionHeader("SKILLS"));
+            if (contactParts.length) {
                 children.push(new Paragraph({
-                    children: [new TextRun({ text: d.skills.map(s => s.name).join("  •  "), size: 20 })],
-                    spacing: { after: 60 },
+                    children: [new TextRun({ text: contactParts.join("  |  "), size: 18, color: "555555", font: "Calibri" })],
+                    alignment: AlignmentType.CENTER,
+                    spacing: { after: 240 },
                 }));
             }
 
-            // Languages
+            // PROFILE
+            if (d.summary?.length) {
+                children.push(sectionHeader(d.titles?.profile || "PROFILE"));
+                d.summary.forEach(s => s.description && children.push(normalPara(s.description)));
+            }
+
+            // EXPERIENCE
+            if (d.workExperience?.length) {
+                children.push(sectionHeader(d.titles?.experience || "EXPERIENCE"));
+                d.workExperience.forEach(w => {
+                    const rows = [];
+                    if (w.position || w.company) rows.push(new TableRow({
+                        children: [
+                            new TableCell({
+                                width: { size: 70, type: WidthType.PERCENT },
+                                children: [new Paragraph({ children: [new TextRun({ text: w.position || "", bold: true, size: 22, font: "Calibri" })] })],
+                                borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } },
+                            }),
+                            new TableCell({
+                                width: { size: 30, type: WidthType.PERCENT },
+                                children: [new Paragraph({
+                                    children: [new TextRun({ text: [w.startDate, w.endDate].filter(Boolean).join(" - ") || "", size: 18, color: "888888", italics: true, font: "Calibri" })],
+                                    alignment: AlignmentType.RIGHT,
+                                })],
+                                borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } },
+                            }),
+                        ],
+                    }));
+                    if (w.company) rows.push(new TableRow({
+                        children: [
+                            new TableCell({
+                                columnSpan: 2,
+                                children: [new Paragraph({ children: [new TextRun({ text: w.company, size: 20, color: "444444", font: "Calibri" })] })],
+                                borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } },
+                            }),
+                        ],
+                    }));
+                    children.push(new Table({ rows, width: { size: 100, type: WidthType.PERCENT } }));
+                    if (w.description) {
+                        w.description.split(/\n|•/).map(s => s.trim()).filter(Boolean)
+                            .forEach(line => children.push(bulletPara(line)));
+                    }
+                    children.push(new Paragraph({ text: "", spacing: { after: 120 } }));
+                });
+            }
+
+            // EDUCATION
+            if (d.educations?.length) {
+                children.push(sectionHeader(d.titles?.education || "EDUCATION"));
+                d.educations.forEach(e => {
+                    const rows = [];
+                    if (e.degree || e.school) rows.push(new TableRow({
+                        children: [
+                            new TableCell({
+                                width: { size: 70, type: WidthType.PERCENT },
+                                children: [new Paragraph({ children: [new TextRun({ text: e.degree || "", bold: true, size: 22, font: "Calibri" })] })],
+                                borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } },
+                            }),
+                            new TableCell({
+                                width: { size: 30, type: WidthType.PERCENT },
+                                children: [new Paragraph({
+                                    children: [new TextRun({ text: [e.startDate, e.endDate].filter(Boolean).join(" - ") || "", size: 18, color: "888888", italics: true, font: "Calibri" })],
+                                    alignment: AlignmentType.RIGHT,
+                                })],
+                                borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } },
+                            }),
+                        ],
+                    }));
+                    if (e.school) rows.push(new TableRow({
+                        children: [
+                            new TableCell({
+                                columnSpan: 2,
+                                children: [new Paragraph({ children: [new TextRun({ text: e.school, size: 20, color: "444444", font: "Calibri" })] })],
+                                borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } },
+                            }),
+                        ],
+                    }));
+                    children.push(new Table({ rows, width: { size: 100, type: WidthType.PERCENT } }));
+                    children.push(new Paragraph({ text: "", spacing: { after: 120 } }));
+                });
+            }
+
+            // PROJECTS
+            if (d.projects?.length) {
+                children.push(sectionHeader(d.titles?.projects || "PROJECTS"));
+                d.projects.forEach(p => {
+                    if (p.name) children.push(new Paragraph({
+                        children: [new TextRun({ text: p.name, bold: true, size: 22, font: "Calibri" })],
+                        spacing: { before: 120, after: 40 },
+                    }));
+                    if (p.description) {
+                        p.description.split(/\n|•/).map(s => s.trim()).filter(Boolean)
+                            .forEach(line => children.push(bulletPara(line)));
+                    }
+                    if (p.url) children.push(new Paragraph({
+                        children: [new TextRun({ text: p.url, size: 18, color: "2563eb", font: "Calibri" })],
+                        spacing: { after: 100 },
+                    }));
+                    children.push(new Paragraph({ text: "", spacing: { after: 80 } }));
+                });
+            }
+
+            // CERTIFICATIONS
+            if (d.courses?.length) {
+                children.push(sectionHeader(d.titles?.certification || "CERTIFICATIONS"));
+                d.courses.forEach(c => c.name && children.push(bulletPara(c.name)));
+            }
+
+            // SKILLS as table
+            if (d.skills?.length) {
+                children.push(sectionHeader(d.titles?.skills || "SKILLS"));
+                const skillChunks = [];
+                const all = d.skills.map(s => s.name);
+                for (let i = 0; i < all.length; i += 4) skillChunks.push(all.slice(i, i + 4));
+                skillChunks.forEach(chunk => {
+                    children.push(new Table({
+                        rows: [new TableRow({
+                            children: chunk.map(s => new TableCell({
+                                children: [new Paragraph({
+                                    children: [new TextRun({ text: `• ${s}`, size: 20, font: "Calibri" })],
+                                })],
+                                borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } },
+                            })),
+                        })],
+                        width: { size: 100, type: WidthType.PERCENT },
+                    }));
+                });
+            }
+
+            // LANGUAGES
             if (d.languages?.length) {
-                children.push(sectionHeader("LANGUAGES"));
+                children.push(sectionHeader(d.titles?.languages || "LANGUAGES"));
                 children.push(new Paragraph({
-                    children: [new TextRun({ text: d.languages.map(l => `${l.name}${l.level ? ` (${l.level})` : ""}`).join("  •  "), size: 20 })],
+                    children: [new TextRun({
+                        text: d.languages.map(l => `${l.name}${l.level ? ` (${l.level})` : ""}`).join("  •  "),
+                        size: 20, font: "Calibri"
+                    })],
                 }));
             }
 
             const doc = new Document({
                 styles: {
-                    default: {
-                        document: { run: { font: "Calibri", size: 20 } },
-                    },
+                    default: { document: { run: { font: "Calibri", size: 20 } } },
                 },
                 sections: [{ children }],
             });
@@ -331,16 +405,15 @@ export default function RightSidebar() {
             try {
                 if (file.name.endsWith(".json")) {
                     const text = await file.text();
-                    setResumeData({ ...resumeData, data: JSON.parse(text) });
+                    const parsed = JSON.parse(text);
+                    safeSetResume(parsed);
                 } else if (file.name.endsWith(".docx")) {
                     const arrayBuffer = await file.arrayBuffer();
                     const mammoth = (await import("mammoth")).default;
                     const result = await mammoth.extractRawText({ arrayBuffer });
                     if (!result || !result.value) throw new Error("Could not read Word file content.");
                     const parsed = parsePlainTextToCV(result.value);
-                    const newResume = { ...resumeData, data: parsed };
-                    setResumeData(newResume);
-                    await syncResumeData(newResume);
+                    safeSetResume(parsed);
                 } else if (file.name.endsWith(".pdf")) {
                     const arrayBuffer = await file.arrayBuffer();
                     const pdfjsLib = await new Promise((resolve, reject) => {
@@ -360,21 +433,23 @@ export default function RightSidebar() {
                     for (let i = 1; i <= pdf.numPages; i++) {
                         const page = await pdf.getPage(i);
                         const content = await page.getTextContent();
-                        text += content.items.map(item => item.str).join(" ") + "\n";
+                        // Reconstruct line breaks based on Y-position
+                        let lastY = null;
+                        const pageLines = [];
+                        let currentLine = [];
+                        content.items.forEach(item => {
+                            if (lastY !== null && Math.abs(item.transform[5] - lastY) > 3) {
+                                if (currentLine.length) pageLines.push(currentLine.join(" "));
+                                currentLine = [];
+                            }
+                            currentLine.push(item.str);
+                            lastY = item.transform[5];
+                        });
+                        if (currentLine.length) pageLines.push(currentLine.join(" "));
+                        text += pageLines.join("\n") + "\n";
                     }
-                    const rawParsed = parsePlainTextToCV(text);
-                    const parsed = {
-                        name: rawParsed.name || "", position: rawParsed.position || "",
-                        email: rawParsed.email || "", contactInformation: rawParsed.contactInformation || "",
-                        address: rawParsed.address || "", socialMedia: rawParsed.socialMedia || [],
-                        summary: rawParsed.summary || [], educations: rawParsed.educations || [],
-                        courses: rawParsed.courses || [], workExperience: rawParsed.workExperience || [],
-                        projects: rawParsed.projects || [], skills: rawParsed.skills || [],
-                        languages: rawParsed.languages || [],
-                        titles: rawParsed.titles || { profile:"PROFILE", experience:"EXPERIENCE", education:"EDUCATION", certification:"CERTIFICATION", skills:"SKILLS", languages:"LANGUAGES" },
-                        order: rawParsed.order || ["contactInformation","profile","workExperience","education","courses","skills","languages"],
-                    };
-                    setResumeData({ ...resumeData, data: parsed });
+                    const parsed = parsePlainTextToCV(text);
+                    safeSetResume(parsed);
                 }
             } catch (err) {
                 alert("Error reading file: " + err.message);
@@ -391,16 +466,27 @@ export default function RightSidebar() {
             setLoading(true);
             try {
                 const jsonData = JSON.parse(text);
-                setResumeData({ ...resumeData, data: jsonData });
+                safeSetResume(jsonData);
             } catch {
                 const parsed = parsePlainTextToCV(text);
-                setResumeData({ ...resumeData, data: parsed });
+                safeSetResume(parsed);
             }
             setLoading(false);
         } catch {
             alert("Failed to read clipboard.");
             setLoading(false);
         }
+    };
+
+    const addCustomSection = () => {
+        const name = prompt("Enter section name (e.g. Publications, Awards):");
+        if (!name) return;
+        const key = name.toLowerCase().replace(/\s+/g, "_");
+        const newData = { ...resumeData.data };
+        if (!newData.customSections) newData.customSections = [];
+        newData.customSections.push({ key, title: name, items: [{ description: "" }] });
+        if (!newData.order.includes(key)) newData.order.push(key);
+        setResumeData({ ...resumeData, data: newData });
     };
 
     return (
@@ -418,18 +504,8 @@ export default function RightSidebar() {
             <CircularButton tooltipText="Upload PDF" onClick={() => triggerFileInput(".pdf")} icon={FaFilePdf} bgColor="bg-red-600 hover:bg-red-700"/>
             <CircularButton tooltipText="Upload Word (.docx)" onClick={() => triggerFileInput(".docx")} icon={FaFileWord} bgColor="bg-blue-500 hover:bg-blue-600"/>
             <CircularButton tooltipText="Paste Text or JSON" onClick={handlePaste} icon={FaPaste} bgColor="bg-green-500 hover:bg-green-600"/>
+            <CircularButton tooltipText="Add Custom Section" onClick={addCustomSection} icon={FaPlus} bgColor="bg-pink-600 hover:bg-pink-700"/>
             <CircularButton tooltipText="Sync" onClick={() => syncResumeData(resumeData)} icon={FaSyncAlt} bgColor="bg-yellow-500 hover:bg-yellow-600"/>
         </div>
     );
 }
-
-
-
-
-
-
-
-
-
-
-
