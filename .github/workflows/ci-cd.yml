@@ -19,11 +19,9 @@ jobs:
         with:
           python-version: '3.12'
       - name: Install dependencies
-        run: |
-          pip install -r req.txt
+        run: pip install -r req.txt
       - name: Run Django tests
-        run: |
-          python manage.py test --verbosity=2
+        run: python manage.py test --verbosity=2
 
   frontend-build:
     runs-on: ubuntu-latest
