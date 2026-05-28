@@ -15,9 +15,11 @@ function CallbackHandler() {
         const error = params.get("error");
 
         if (error) { router.push("/?error=" + error); return; }
+
         if (access && refresh) {
             setOAuthCookies({ access, refresh, username, email }).then(() => {
-                router.push("/dashboard");
+                // Full reload forces AppProvider to re-read cookies
+                window.location.href = "/dashboard";
             });
         }
     }, []);
