@@ -362,7 +362,18 @@ export default function RightSidebar() {
                         const content = await page.getTextContent();
                         text += content.items.map(item => item.str).join(" ") + "\n";
                     }
-                    const parsed = parsePlainTextToCV(text);
+                    const rawParsed = parsePlainTextToCV(text);
+                    const parsed = {
+                        name: rawParsed.name || "", position: rawParsed.position || "",
+                        email: rawParsed.email || "", contactInformation: rawParsed.contactInformation || "",
+                        address: rawParsed.address || "", socialMedia: rawParsed.socialMedia || [],
+                        summary: rawParsed.summary || [], educations: rawParsed.educations || [],
+                        courses: rawParsed.courses || [], workExperience: rawParsed.workExperience || [],
+                        projects: rawParsed.projects || [], skills: rawParsed.skills || [],
+                        languages: rawParsed.languages || [],
+                        titles: rawParsed.titles || { profile:"PROFILE", experience:"EXPERIENCE", education:"EDUCATION", certification:"CERTIFICATION", skills:"SKILLS", languages:"LANGUAGES" },
+                        order: rawParsed.order || ["contactInformation","profile","workExperience","education","courses","skills","languages"],
+                    };
                     setResumeData({ ...resumeData, data: parsed });
                 }
             } catch (err) {
@@ -411,6 +422,7 @@ export default function RightSidebar() {
         </div>
     );
 }
+
 
 
 
