@@ -104,7 +104,7 @@ SOCIALACCOUNT_PROVIDERS = {
     }
 }
 SOCIALACCOUNT_AUTO_SIGNUP = True
+# Fixed: django-allauth 0.55+ deprecated settings
 ACCOUNT_SIGNUP_FIELDS = ["email*", "password1*", "password2*"]
 ACCOUNT_LOGIN_METHODS = {"email"}
 FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3000")
-
