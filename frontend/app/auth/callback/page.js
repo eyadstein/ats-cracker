@@ -1,9 +1,9 @@
 'use client';
-import { useEffect } from "react";
+import { useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { setOAuthCookies } from "@/actions/oauth";
 
-export default function OAuthCallbackPage() {
+function CallbackHandler() {
     const router = useRouter();
     const params = useSearchParams();
 
@@ -14,11 +14,7 @@ export default function OAuthCallbackPage() {
         const email = params.get("email");
         const error = params.get("error");
 
-        if (error) {
-            router.push("/?error=" + error);
-            return;
-        }
-
+        if (error) { router.push("/?error=" + error); return; }
         if (access && refresh) {
             setOAuthCookies({ access, refresh, username, email }).then(() => {
                 router.push("/dashboard");
@@ -26,6 +22,10 @@ export default function OAuthCallbackPage() {
         }
     }, []);
 
+    return null;
+}
+
+export default function OAuthCallbackPage() {
     return (
         <div className="fixed inset-0 flex items-center justify-center" style={{background: "linear-gradient(135deg, #0f0f0f, #1a1a2e)"}}>
             <div className="text-center">
@@ -35,6 +35,9 @@ export default function OAuthCallbackPage() {
                 <p className="text-white font-bold text-lg">Signing you in...</p>
                 <p className="text-gray-500 text-sm mt-1">Please wait</p>
             </div>
+            <Suspense fallback={null}>
+                <CallbackHandler />
+            </Suspense>
         </div>
     );
 }
