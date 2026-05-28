@@ -5,10 +5,10 @@ import * as ServerActions from "@/actions/register";
 import { showErrorAlert } from "@/lib/alerts";
 import useAppContext from "@/hooks/useAppContext";
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://127.0.0.1:8000";
-const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "";
-const MICROSOFT_CLIENT_ID = process.env.NEXT_PUBLIC_MICROSOFT_CLIENT_ID || "";
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "https://ats-cracker-production.up.railway.app";
 const GITHUB_CLIENT_ID = process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID || "Ov23liOotRANg0xO7IPc";
+const GOOGLE_CLIENT_ID = "759900078937-07h8v8d9t399o1bnfg8vmhh7lvdfb5sk.apps.googleusercontent.com";
+const MICROSOFT_CLIENT_ID = process.env.NEXT_PUBLIC_MICROSOFT_CLIENT_ID || "";
 
 export default function RegisterModal({ onChangeModal, closeModal }) {
     const [formData, setFormData] = useState({ email: "", password: "", confirm_password: "", username: "" });
@@ -46,10 +46,6 @@ export default function RegisterModal({ onChangeModal, closeModal }) {
     };
 
     const googleLogin = () => {
-        if (!GOOGLE_CLIENT_ID || GOOGLE_CLIENT_ID.includes("YOUR_")) {
-            showErrorAlert("Google OAuth is not configured. Add NEXT_PUBLIC_GOOGLE_CLIENT_ID to your environment variables.");
-            return;
-        }
         const redirectUri = `${BACKEND_URL}/auth/google/callback/`;
         const scope = "openid email profile";
         const url = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${GOOGLE_CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${encodeURIComponent(scope)}&access_type=offline`;
@@ -57,10 +53,7 @@ export default function RegisterModal({ onChangeModal, closeModal }) {
     };
 
     const microsoftLogin = () => {
-        if (!MICROSOFT_CLIENT_ID || MICROSOFT_CLIENT_ID.includes("YOUR_")) {
-            showErrorAlert("Microsoft OAuth is not configured. Add NEXT_PUBLIC_MICROSOFT_CLIENT_ID to your environment variables.");
-            return;
-        }
+        if (!MICROSOFT_CLIENT_ID) { showErrorAlert("Microsoft OAuth not configured."); return; }
         const redirectUri = `${BACKEND_URL}/auth/microsoft/callback/`;
         const scope = "openid email profile User.Read";
         const url = `https://login.microsoftonline.com/common/oauth2/v2.0/authorize?client_id=${MICROSOFT_CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${encodeURIComponent(scope)}`;

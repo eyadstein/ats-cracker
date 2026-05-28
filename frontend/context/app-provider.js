@@ -5,7 +5,7 @@ import {getEmailAndName} from "@/lib/utils";
 import {cvCreateUpdate, cvGetAction} from "@/actions/cvs";
 
 const AppProvider = ({children}) => {
-    const [resumeData, setResumeData] = useState(null);
+    const [resumeData, setResumeDataRaw] = useState(null);
     const [resumeList, setResumeList] = useState([]);
     const globalRefs = useRef({});
     const [controlPanel, setControlPanel] = useState(0);
@@ -30,7 +30,7 @@ const AppProvider = ({children}) => {
         try {
             const response = await cvCreateUpdate(data);
             if (response.success && resumeData?.id === 'new') {
-                setResumeData({ ...response.response });
+                setResumeDataRaw({ ...response.response });
             }
             setSaveStatus("saved");
             if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
@@ -53,10 +53,10 @@ const AppProvider = ({children}) => {
                 certification: "CERTIFICATION", skills: "SKILLS", languages: "LANGUAGES", projects: "PROJECTS"
             },
             order: ["contactInformation","profile","workExperience","education","courses","skills","languages","projects"],
+            customSections: [],
         }
     };
 
-    // SAFE setter that merges with default structure to prevent undefined crashes
     const safeSetResumeData = useCallback((newData) => {
         const merged = {
             ...defaultCv,
@@ -64,7 +64,6 @@ const AppProvider = ({children}) => {
             data: {
                 ...defaultCv.data,
                 ...(newData?.data || {}),
-                // Ensure arrays always exist
                 socialMedia: newData?.data?.socialMedia || [],
                 summary: newData?.data?.summary || [],
                 educations: newData?.data?.educations || [],
@@ -73,16 +72,19 @@ const AppProvider = ({children}) => {
                 projects: newData?.data?.projects || [],
                 skills: newData?.data?.skills || [],
                 languages: newData?.data?.languages || [],
-                // Ensure order exists and only contains valid sections
-                order: (newData?.data?.order || defaultCv.data.order).filter(k => defaultCv.data.order.includes(k) || k === 'projects'),
-                // Ensure titles exist
+                customSections: newData?.data?.customSections || [],
+                order: (newData?.data?.order || defaultCv.data.order).filter(k => {
+                    const known = ["contactInformation","profile","workExperience","education","courses","skills","languages","projects"];
+                    const customKeys = (newData?.data?.customSections || []).map(s => s.key);
+                    return known.includes(k) || customKeys.includes(k);
+                }),
                 titles: {
                     ...defaultCv.data.titles,
                     ...(newData?.data?.titles || {}),
                 },
             }
         };
-        setResumeData(merged);
+        setResumeDataRaw(merged);
         return merged;
     }, []);
 
@@ -93,15 +95,14 @@ const AppProvider = ({children}) => {
             const response = await cvGetAction(id);
             if (response.success) cv = response.cv;
         }
-        // Merge with defaults to prevent crashes on old data
         safeSetResumeData(cv || {...defaultCv});
     };
 
-    const updateResumeData = (newData) => setResumeData(newData);
+    const updateResumeData = (newData) => setResumeDataRaw(newData);
     const OnEditSectionTitle = (e, section) => {
         const value = e.target.innerText;
         const updatedTitles = {...(resumeData?.titles || {}), [section]: value};
-        setResumeData({...resumeData, titles: updatedTitles});
+        setResumeDataRaw({...resumeData, titles: updatedTitles});
     };
 
     const checkAuthStatus = () => {
@@ -125,7 +126,7 @@ const AppProvider = ({children}) => {
     const getSectionCompletion = useCallback(() => {
         if (!resumeData?.data) return {};
         const d = resumeData.data;
-        return {
+        const base = {
             contactInformation: !!(d.name && d.email),
             profile: d.summary?.length > 0,
             workExperience: d.workExperience?.length > 0,
@@ -135,6 +136,11 @@ const AppProvider = ({children}) => {
             languages: d.languages?.length > 0,
             projects: d.projects?.length > 0,
         };
+        // Add custom sections
+        (d.customSections || []).forEach(s => {
+            base[s.key] = s.items?.length > 0 && s.items.some(i => i.description?.trim());
+        });
+        return base;
     }, [resumeData]);
 
     useEffect(() => {
@@ -143,7 +149,6 @@ const AppProvider = ({children}) => {
         return () => clearInterval(interval);
     }, []);
 
-    // Initialize with default CV on mount if null
     useEffect(() => {
         if (!resumeData) {
             safeSetResumeData({...defaultCv});

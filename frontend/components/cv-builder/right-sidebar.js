@@ -1,6 +1,6 @@
 "use client";
 import CircularButton from "@/components/general/circle-btn";
-import {FaDownload, FaCopy, FaUpload, FaPaste, FaSyncAlt, FaFileWord, FaFilePdf, FaPlus} from "react-icons/fa";
+import {FaDownload, FaCopy, FaUpload, FaPaste, FaSyncAlt, FaFileWord, FaFilePdf} from "react-icons/fa";
 import useAppContext from "@/hooks/useAppContext";
 import {DownloadIcon} from "@/components/svgs/svgs";
 import { useState } from "react";
@@ -164,7 +164,6 @@ export default function RightSidebar() {
         };
         const updated = { ...resumeData, data: safe };
         setResumeData(updated);
-        // Auto-sync to backend to prevent data loss
         try {
             await syncResumeData(updated);
         } catch (e) {
@@ -381,9 +380,16 @@ export default function RightSidebar() {
         const input = document.createElement("input");
         input.type = "file";
         input.accept = accept;
-        input.onchange = async (e) => {
+        // CRITICAL FIX: append to DOM so browser doesn't block it
+        input.style.display = "none";
+        document.body.appendChild(input);
+        
+        input.addEventListener("change", async (e) => {
             const file = e.target.files[0];
-            if (!file) return;
+            if (!file) {
+                document.body.removeChild(input);
+                return;
+            }
             setLoading(true);
             try {
                 if (file.name.endsWith(".json")) {
@@ -436,7 +442,10 @@ export default function RightSidebar() {
                 alert("Error reading file: " + err.message);
             }
             setLoading(false);
-        };
+            // Clean up
+            if (input.parentNode) document.body.removeChild(input);
+        }, { once: true });
+        
         input.click();
     };
 
@@ -459,20 +468,6 @@ export default function RightSidebar() {
         }
     };
 
-    const addCustomSection = () => {
-        const name = prompt("Enter section name (e.g. Publications, Awards):");
-        if (!name) return;
-        const key = name.toLowerCase().replace(/\s+/g, "_");
-        const currentData = resumeData?.data || {};
-        const newData = {
-            ...currentData,
-            customSections: [...(currentData.customSections || []), { key, title: name, items: [{ description: "" }] }],
-            order: [...(currentData.order || []), key],
-        };
-        const updated = { ...resumeData, data: newData };
-        setResumeData(updated);
-    };
-
     return (
         <div className="fixed right-4 top-1/4 flex flex-col gap-3 z-10">
             {loading && (
@@ -488,7 +483,6 @@ export default function RightSidebar() {
             <CircularButton tooltipText="Upload PDF" onClick={() => triggerFileInput(".pdf")} icon={FaFilePdf} bgColor="bg-red-600 hover:bg-red-700"/>
             <CircularButton tooltipText="Upload Word (.docx)" onClick={() => triggerFileInput(".docx")} icon={FaFileWord} bgColor="bg-blue-500 hover:bg-blue-600"/>
             <CircularButton tooltipText="Paste Text or JSON" onClick={handlePaste} icon={FaPaste} bgColor="bg-green-500 hover:bg-green-600"/>
-            <CircularButton tooltipText="Add Custom Section" onClick={addCustomSection} icon={FaPlus} bgColor="bg-pink-600 hover:bg-pink-700"/>
             <CircularButton tooltipText="Sync" onClick={() => syncResumeData(resumeData)} icon={FaSyncAlt} bgColor="bg-yellow-500 hover:bg-yellow-600"/>
         </div>
     );

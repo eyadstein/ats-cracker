@@ -18,9 +18,148 @@ import LanguagesEditor from "@/components/cv-builder/control-components/language
 import LanguageItemEditor from "@/components/cv-builder/control-components/languages-item-editor";
 import useDndContext from "@/context/dnd-context";
 import DroppableUtil from "@/components/cv-builder/utils/droppable-utils";
+import { FaPlus } from "react-icons/fa";
+
+// Simple Projects editor wrapper
+function ProjectsEditor() {
+    const { resumeData, setResumeData, syncResumeData } = useAppContext();
+    const projects = resumeData?.data?.projects || [];
+    
+    const addProject = () => {
+        const newProject = { name: "New Project", description: "", url: "" };
+        const newData = {
+            ...resumeData,
+            data: {
+                ...resumeData.data,
+                projects: [...projects, newProject],
+            }
+        };
+        setResumeData(newData);
+        syncResumeData(newData);
+    };
+    
+    const removeProject = (idx) => {
+        const newProjects = [...projects];
+        newProjects.splice(idx, 1);
+        const newData = { ...resumeData, data: { ...resumeData.data, projects: newProjects } };
+        setResumeData(newData);
+        syncResumeData(newData);
+    };
+    
+    const updateProject = (idx, field, value) => {
+        const newProjects = [...projects];
+        newProjects[idx] = { ...newProjects[idx], [field]: value };
+        const newData = { ...resumeData, data: { ...resumeData.data, projects: newProjects } };
+        setResumeData(newData);
+        syncResumeData(newData);
+    };
+
+    return (
+        <div className="rounded-large shadow-card w-full bg-white px-5 md:px-7 lg:px-9 relative max-w-full pb-9 pt-6 mb-4">
+            <div className="flex items-center gap-3 mb-4">
+                <div className="w-8 h-8 rounded-lg bg-indigo-100 flex items-center justify-center">
+                    <span className="text-indigo-600 font-bold text-sm">P</span>
+                </div>
+                <h3 className="font-bold text-gray-800">Projects</h3>
+            </div>
+            {projects.map((p, i) => (
+                <div key={i} className="mb-3 p-3 bg-gray-50 rounded-lg">
+                    <input
+                        className="w-full mb-2 px-3 py-2 rounded border border-gray-200 text-sm"
+                        placeholder="Project name"
+                        value={p.name || ""}
+                        onChange={(e) => updateProject(i, "name", e.target.value)}
+                    />
+                    <input
+                        className="w-full mb-2 px-3 py-2 rounded border border-gray-200 text-sm"
+                        placeholder="URL (optional)"
+                        value={p.url || ""}
+                        onChange={(e) => updateProject(i, "url", e.target.value)}
+                    />
+                    <textarea
+                        className="w-full px-3 py-2 rounded border border-gray-200 text-sm"
+                        placeholder="Description"
+                        rows={2}
+                        value={p.description || ""}
+                        onChange={(e) => updateProject(i, "description", e.target.value)}
+                    />
+                    <button onClick={() => removeProject(i)} className="mt-2 text-red-500 text-xs font-semibold hover:text-red-700">Remove</button>
+                </div>
+            ))}
+            <button
+                onClick={addProject}
+                className="w-full py-2.5 rounded-xl border-2 border-dashed border-gray-300 text-gray-500 font-semibold text-sm hover:border-indigo-400 hover:text-indigo-600 transition-all flex items-center justify-center gap-2"
+            >
+                <FaPlus size={12} /> Add Project
+            </button>
+        </div>
+    );
+}
+
+// Generic custom section editor
+function CustomSectionEditor({ sectionKey, title }) {
+    const { resumeData, setResumeData, syncResumeData } = useAppContext();
+    const section = resumeData?.data?.customSections?.find(s => s.key === sectionKey);
+    const items = section?.items || [];
+
+    const addItem = () => {
+        const newSections = (resumeData?.data?.customSections || []).map(s =>
+            s.key === sectionKey ? { ...s, items: [...s.items, { description: "" }] } : s
+        );
+        const newData = { ...resumeData, data: { ...resumeData.data, customSections: newSections } };
+        setResumeData(newData);
+        syncResumeData(newData);
+    };
+
+    const updateItem = (idx, value) => {
+        const newSections = (resumeData?.data?.customSections || []).map(s =>
+            s.key === sectionKey ? { ...s, items: s.items.map((it, i) => i === idx ? { ...it, description: value } : it) } : s
+        );
+        const newData = { ...resumeData, data: { ...resumeData.data, customSections: newSections } };
+        setResumeData(newData);
+        syncResumeData(newData);
+    };
+
+    const removeItem = (idx) => {
+        const newSections = (resumeData?.data?.customSections || []).map(s =>
+            s.key === sectionKey ? { ...s, items: s.items.filter((_, i) => i !== idx) } : s
+        );
+        const newData = { ...resumeData, data: { ...resumeData.data, customSections: newSections } };
+        setResumeData(newData);
+        syncResumeData(newData);
+    };
+
+    return (
+        <div className="rounded-large shadow-card w-full bg-white px-5 md:px-7 lg:px-9 relative max-w-full pb-9 pt-6 mb-4">
+            <div className="flex items-center gap-3 mb-4">
+                <div className="w-8 h-8 rounded-lg bg-pink-100 flex items-center justify-center">
+                    <span className="text-pink-600 font-bold text-sm">+</span>
+                </div>
+                <h3 className="font-bold text-gray-800">{title}</h3>
+            </div>
+            {items.map((item, i) => (
+                <div key={i} className="mb-2 flex gap-2">
+                    <input
+                        className="flex-1 px-3 py-2 rounded border border-gray-200 text-sm"
+                        placeholder="Item description"
+                        value={item.description || ""}
+                        onChange={(e) => updateItem(i, e.target.value)}
+                    />
+                    <button onClick={() => removeItem(i)} className="text-red-500 text-xs font-semibold px-2 hover:text-red-700">✕</button>
+                </div>
+            ))}
+            <button
+                onClick={addItem}
+                className="w-full py-2.5 rounded-xl border-2 border-dashed border-gray-300 text-gray-500 font-semibold text-sm hover:border-pink-400 hover:text-pink-600 transition-all flex items-center justify-center gap-2"
+            >
+                <FaPlus size={12} /> Add Item
+            </button>
+        </div>
+    );
+}
 
 export default function ControlPanel({id}) {
-    const {resumeData, controlPanel, currentEditIndex, user, setControlPanelIndex, getSectionCompletion} = useAppContext();
+    const {resumeData, controlPanel, currentEditIndex, user, setControlPanelIndex, getSectionCompletion, setResumeData, syncResumeData} = useAppContext();
     const [isLoaded, setIsLoaded] = useState(true);
     const [animKey, setAnimKey] = useState(0);
     const {Draggable} = useDndContext();
@@ -48,26 +187,45 @@ export default function ControlPanel({id}) {
         projects: "Projects",
     };
 
-    const editors = {
-        contactInformation: <ContactInformationPreview />,
-        profile: <ProfileEditor />,
-        workExperience: <WorkExperienceEditor />,
-        education: <EducationEditor />,
-        courses: <CertificationEditor />,
-        skills: <SkillsEditor />,
-        languages: <LanguagesEditor />,
-        projects: <div className="p-4 bg-gray-50 rounded-xl border border-gray-200"><h3 className="font-bold text-gray-700">Projects</h3><p className="text-sm text-gray-500">Edit projects in the preview panel</p></div>,
+    // Build editors map dynamically including custom sections
+    const getEditors = () => {
+        const base = {
+            contactInformation: <ContactInformationPreview />,
+            profile: <ProfileEditor />,
+            workExperience: <WorkExperienceEditor />,
+            education: <EducationEditor />,
+            courses: <CertificationEditor />,
+            skills: <SkillsEditor />,
+            languages: <LanguagesEditor />,
+            projects: <ProjectsEditor />,
+        };
+        // Add custom section editors
+        (resumeData?.data?.customSections || []).forEach(s => {
+            base[s.key] = <CustomSectionEditor sectionKey={s.key} title={s.title} />;
+        });
+        return base;
+    };
+
+    const addCustomSection = () => {
+        const name = prompt("Enter section name (e.g. Publications, Awards):");
+        if (!name) return;
+        const key = name.toLowerCase().replace(/\s+/g, "_").replace(/[^a-z0-9_]/g, "");
+        const currentData = resumeData?.data || {};
+        const newCustomSections = [...(currentData.customSections || []), { key, title: name, items: [{ description: "" }] }];
+        const newOrder = [...(currentData.order || []), key];
+        const newData = { ...resumeData, data: { ...currentData, customSections: newCustomSections, order: newOrder } };
+        setResumeData(newData);
+        syncResumeData(newData);
     };
 
     const renderEditors = () => {
-        // GUARD: ensure order exists and only render known sections
+        const editors = getEditors();
         const order = resumeData?.data?.order || ["contactInformation","profile","workExperience","education","courses","skills","languages"];
         return order.map((section, index) => {
-            // Skip unknown sections to prevent crashes
             if (!editors[section]) return null;
             const isDone = completion?.[section] || false;
             return (
-                <Draggable key={section} draggableId={section} index={index}>
+                <Draggable key={section} draggableId={String(section)} index={index}>
                     {(provided, snapshot) => (
                         <div
                             ref={provided.innerRef}
@@ -126,9 +284,18 @@ export default function ControlPanel({id}) {
                 `}</style>
 
                 {controlPanel === ControlPanelView.MainView && (
-                    <DroppableUtil droppableId="layout" type="LAYOUT">
-                        {renderEditors()}
-                    </DroppableUtil>
+                    <>
+                        <DroppableUtil droppableId="layout" type="LAYOUT">
+                            {renderEditors()}
+                        </DroppableUtil>
+                        {/* Add Section button at bottom */}
+                        <button
+                            onClick={addCustomSection}
+                            className="w-full mt-4 py-3 rounded-xl border-2 border-dashed border-gray-300 text-gray-500 font-semibold text-sm hover:border-pink-400 hover:text-pink-600 transition-all flex items-center justify-center gap-2 bg-white/50"
+                        >
+                            <FaPlus size={14} /> Add a new section
+                        </button>
+                    </>
                 )}
                 {controlPanel === ControlPanelView.WorkExperienceEditor && <WorkExperienceItemEditor/>}
                 {controlPanel === ControlPanelView.PersonalDetailsEditor && <ContactInformationEdit/>}

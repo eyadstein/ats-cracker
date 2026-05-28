@@ -17,21 +17,27 @@ def get_tokens_for_user(user):
 def github_callback(request):
     code = request.GET.get("code")
     if not code:
-        return redirect(f"{os.getenv('FRONTEND_URL', 'http://localhost:3000')}/?error=no_code")
+        return redirect(f"{os.getenv('FRONTEND_URL', 'https://ats-cracker-206.vercel.app')}/?error=no_code")
+
+    client_id = os.getenv("GITHUB_CLIENT_ID", "Ov23liOotRANg0xO7IPc")
+    client_secret = os.getenv("GITHUB_CLIENT_SECRET")
+    
+    if not client_secret:
+        return redirect(f"{os.getenv('FRONTEND_URL', 'https://ats-cracker-206.vercel.app')}/?error=github_secret_not_configured")
 
     token_res = requests.post(
         "https://github.com/login/oauth/access_token",
         headers={"Accept": "application/json"},
         data={
-            "client_id": os.getenv("GITHUB_CLIENT_ID"),
-            "client_secret": os.getenv("GITHUB_CLIENT_SECRET"),
+            "client_id": client_id,
+            "client_secret": client_secret,
             "code": code,
         }
     )
     token_data = token_res.json()
     access_token = token_data.get("access_token")
     if not access_token:
-        return redirect(f"{os.getenv('FRONTEND_URL', 'http://localhost:3000')}/?error=no_token")
+        return redirect(f"{os.getenv('FRONTEND_URL', 'https://ats-cracker-206.vercel.app')}/?error=no_token")
 
     user_res = requests.get(
         "https://api.github.com/user",
@@ -50,7 +56,7 @@ def github_callback(request):
         email = primary["email"] if primary else None
 
     if not email:
-        return redirect(f"{os.getenv('FRONTEND_URL', 'http://localhost:3000')}/?error=no_email")
+        return redirect(f"{os.getenv('FRONTEND_URL', 'https://ats-cracker-206.vercel.app')}/?error=no_email")
 
     username = github_user.get("login", email.split("@")[0])
     user, created = User.objects.get_or_create(email=email, defaults={"username": username})
@@ -59,7 +65,7 @@ def github_callback(request):
         user.save()
 
     tokens = get_tokens_for_user(user)
-    frontend_url = os.getenv("FRONTEND_URL", "http://localhost:3000")
+    frontend_url = os.getenv("FRONTEND_URL", "https://ats-cracker-206.vercel.app")
     return redirect(
         f"{frontend_url}/auth/callback?"
         f"access={tokens['access']}&refresh={tokens['refresh']}"
@@ -70,22 +76,28 @@ def github_callback(request):
 def google_callback(request):
     code = request.GET.get("code")
     if not code:
-        return redirect(f"{os.getenv('FRONTEND_URL', 'http://localhost:3000')}/?error=no_code")
+        return redirect(f"{os.getenv('FRONTEND_URL', 'https://ats-cracker-206.vercel.app')}/?error=no_code")
+
+    client_id = os.getenv("GOOGLE_CLIENT_ID")
+    client_secret = os.getenv("GOOGLE_CLIENT_SECRET")
+    
+    if not client_id or not client_secret:
+        return redirect(f"{os.getenv('FRONTEND_URL', 'https://ats-cracker-206.vercel.app')}/?error=google_not_configured")
 
     token_res = requests.post(
         "https://oauth2.googleapis.com/token",
         data={
             "code": code,
-            "client_id": os.getenv("GOOGLE_CLIENT_ID"),
-            "client_secret": os.getenv("GOOGLE_CLIENT_SECRET"),
-            "redirect_uri": f"{os.getenv('BACKEND_URL', 'http://localhost:8000')}/auth/google/callback/",
+            "client_id": client_id,
+            "client_secret": client_secret,
+            "redirect_uri": f"{os.getenv('BACKEND_URL', 'https://ats-cracker-production.up.railway.app')}/auth/google/callback/",
             "grant_type": "authorization_code",
         }
     )
     token_data = token_res.json()
     access_token = token_data.get("access_token")
     if not access_token:
-        return redirect(f"{os.getenv('FRONTEND_URL', 'http://localhost:3000')}/?error=no_token")
+        return redirect(f"{os.getenv('FRONTEND_URL', 'https://ats-cracker-206.vercel.app')}/?error=no_token")
 
     user_res = requests.get(
         "https://www.googleapis.com/oauth2/v2/userinfo",
@@ -95,7 +107,7 @@ def google_callback(request):
 
     email = google_user.get("email")
     if not email:
-        return redirect(f"{os.getenv('FRONTEND_URL', 'http://localhost:3000')}/?error=no_email")
+        return redirect(f"{os.getenv('FRONTEND_URL', 'https://ats-cracker-206.vercel.app')}/?error=no_email")
 
     username = google_user.get("name", email.split("@")[0]).replace(" ", "_")
     user, created = User.objects.get_or_create(email=email, defaults={"username": username})
@@ -104,7 +116,7 @@ def google_callback(request):
         user.save()
 
     tokens = get_tokens_for_user(user)
-    frontend_url = os.getenv("FRONTEND_URL", "http://localhost:3000")
+    frontend_url = os.getenv("FRONTEND_URL", "https://ats-cracker-206.vercel.app")
     return redirect(
         f"{frontend_url}/auth/callback?"
         f"access={tokens['access']}&refresh={tokens['refresh']}"
@@ -115,22 +127,28 @@ def google_callback(request):
 def microsoft_callback(request):
     code = request.GET.get("code")
     if not code:
-        return redirect(f"{os.getenv('FRONTEND_URL', 'http://localhost:3000')}/?error=no_code")
+        return redirect(f"{os.getenv('FRONTEND_URL', 'https://ats-cracker-206.vercel.app')}/?error=no_code")
+
+    client_id = os.getenv("MICROSOFT_CLIENT_ID")
+    client_secret = os.getenv("MICROSOFT_CLIENT_SECRET")
+    
+    if not client_id or not client_secret:
+        return redirect(f"{os.getenv('FRONTEND_URL', 'https://ats-cracker-206.vercel.app')}/?error=microsoft_not_configured")
 
     token_res = requests.post(
         "https://login.microsoftonline.com/common/oauth2/v2.0/token",
         data={
             "code": code,
-            "client_id": os.getenv("MICROSOFT_CLIENT_ID"),
-            "client_secret": os.getenv("MICROSOFT_CLIENT_SECRET"),
-            "redirect_uri": f"{os.getenv('BACKEND_URL', 'http://localhost:8000')}/auth/microsoft/callback/",
+            "client_id": client_id,
+            "client_secret": client_secret,
+            "redirect_uri": f"{os.getenv('BACKEND_URL', 'https://ats-cracker-production.up.railway.app')}/auth/microsoft/callback/",
             "grant_type": "authorization_code",
         }
     )
     token_data = token_res.json()
     access_token = token_data.get("access_token")
     if not access_token:
-        return redirect(f"{os.getenv('FRONTEND_URL', 'http://localhost:3000')}/?error=no_token")
+        return redirect(f"{os.getenv('FRONTEND_URL', 'https://ats-cracker-206.vercel.app')}/?error=no_token")
 
     user_res = requests.get(
         "https://graph.microsoft.com/v1.0/me",
@@ -140,7 +158,7 @@ def microsoft_callback(request):
 
     email = ms_user.get("mail") or ms_user.get("userPrincipalName")
     if not email:
-        return redirect(f"{os.getenv('FRONTEND_URL', 'http://localhost:3000')}/?error=no_email")
+        return redirect(f"{os.getenv('FRONTEND_URL', 'https://ats-cracker-206.vercel.app')}/?error=no_email")
 
     username = ms_user.get("displayName", email.split("@")[0]).replace(" ", "_")
     user, created = User.objects.get_or_create(email=email, defaults={"username": username})
@@ -149,7 +167,7 @@ def microsoft_callback(request):
         user.save()
 
     tokens = get_tokens_for_user(user)
-    frontend_url = os.getenv("FRONTEND_URL", "http://localhost:3000")
+    frontend_url = os.getenv("FRONTEND_URL", "https://ats-cracker-206.vercel.app")
     return redirect(
         f"{frontend_url}/auth/callback?"
         f"access={tokens['access']}&refresh={tokens['refresh']}"
