@@ -7,8 +7,6 @@ import useAppContext from "@/hooks/useAppContext";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "https://ats-cracker-production.up.railway.app";
 const GITHUB_CLIENT_ID = process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID || "Ov23liOotRANg0xO7IPc";
-
-// ONLY use env var — no hardcoded fallback
 const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "";
 const MICROSOFT_CLIENT_ID = process.env.NEXT_PUBLIC_MICROSOFT_CLIENT_ID || "";
 
@@ -38,7 +36,7 @@ export default function LoginModal({ onChangeModal, closeModal }) {
 
     const googleLogin = () => {
         if (!GOOGLE_CLIENT_ID) {
-            showErrorAlert("Google OAuth is not configured. Add NEXT_PUBLIC_GOOGLE_CLIENT_ID to Vercel environment variables.");
+            showErrorAlert("Google OAuth not configured. Add NEXT_PUBLIC_GOOGLE_CLIENT_ID to Vercel env vars.");
             return;
         }
         const redirectUri = `${BACKEND_URL}/auth/google/callback/`;
@@ -49,7 +47,7 @@ export default function LoginModal({ onChangeModal, closeModal }) {
 
     const microsoftLogin = () => {
         if (!MICROSOFT_CLIENT_ID) {
-            showErrorAlert("Microsoft OAuth is not configured yet.");
+            showErrorAlert("Microsoft OAuth not configured.");
             return;
         }
         const redirectUri = `${BACKEND_URL}/auth/microsoft/callback/`;
