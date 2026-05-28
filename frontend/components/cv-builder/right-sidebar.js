@@ -24,19 +24,16 @@ function parsePlainTextToCV(rawText) {
     if (phoneMatch) cv.contactInformation = phoneMatch[0].trim();
 
     const linkedinMatch = full.match(/linkedin\.com\/in\/[\w-]+/i);
-    if (linkedinMatch) cv.socialMedia.push({ name: "LinkedIn", url: "https://" + linkedinMatch[0] });
-
-    const cityMatch = full.match(/\b([A-Z][a-z]+(?:,\s*[A-Z][a-z]+)*(?:,\s*[A-Z]{2,})?)\b/);
-    if (cityMatch && cityMatch[0].length < 40) cv.address = cityMatch[0];
+    if (linkedinMatch) cv.socialMedia.push({ name: "LinkedIn", link: "https://" + linkedinMatch[0] });
 
     const SECTIONS = [
-        { key: "summary",        re: /^(profile|summary|about|objective|about me|professional summary)$/i },
-        { key: "experience",     re: /^(experience|work experience|employment|professional experience|work history|career)$/i },
-        { key: "education",      re: /^(education|academic background|qualifications|degrees|academic)$/i },
-        { key: "skills",         re: /^(skills|technical skills|core skills|competencies|technologies|tech stack|tools|frameworks|programming)$/i },
-        { key: "projects",       re: /^(projects|personal projects|key projects|portfolio|selected projects)$/i },
-        { key: "languages",      re: /^(languages|language skills|spoken languages)$/i },
-        { key: "courses",        re: /^(certifications|courses|training|certificates|professional development)$/i },
+        { key: "summary", re: /^(profile|summary|about|objective|about me|professional summary)$/i },
+        { key: "experience", re: /^(experience|work experience|employment|professional experience|work history|career)$/i },
+        { key: "education", re: /^(education|academic background|qualifications|degrees|academic)$/i },
+        { key: "skills", re: /^(skills|technical skills|core skills|competencies|technologies|tech stack|tools|frameworks|programming)$/i },
+        { key: "projects", re: /^(projects|personal projects|key projects|portfolio|selected projects)$/i },
+        { key: "languages", re: /^(languages|language skills|spoken languages)$/i },
+        { key: "courses", re: /^(certifications|courses|training|certificates|professional development)$/i },
     ];
 
     const isSectionHeader = (line) => SECTIONS.find(s => s.re.test(line.trim()));
@@ -153,7 +150,7 @@ export default function RightSidebar() {
     const {resumeData, setResumeData, syncResumeData} = useAppContext();
     const [loading, setLoading] = useState(false);
 
-    const safeSetResume = (newData) => {
+    const safeSetResume = async (newData) => {
         const safe = {
             name: newData.name || "", position: newData.position || "",
             email: newData.email || "", contactInformation: newData.contactInformation || "",
@@ -163,17 +160,23 @@ export default function RightSidebar() {
             projects: newData.projects || [], skills: newData.skills || [],
             languages: newData.languages || [],
             titles: newData.titles || { profile:"PROFILE", experience:"EXPERIENCE", education:"EDUCATION", certification:"CERTIFICATION", skills:"SKILLS", languages:"LANGUAGES", projects:"PROJECTS" },
-            order: newData.order || ["contactInformation","profile","workExperience","education","courses","skills","languages"],
+            order: newData.order || ["contactInformation","profile","workExperience","education","courses","skills","languages","projects"],
         };
         const updated = { ...resumeData, data: safe };
         setResumeData(updated);
+        // Auto-sync to backend to prevent data loss
+        try {
+            await syncResumeData(updated);
+        } catch (e) {
+            console.error("Sync failed:", e);
+        }
         return updated;
     };
 
     const downloadAsJson = () => {
         const el = document.createElement("a");
-        el.href = URL.createObjectURL(new Blob([JSON.stringify(resumeData.data)], {type: "application/json"}));
-        el.download = `resume-${resumeData.title}.json`;
+        el.href = URL.createObjectURL(new Blob([JSON.stringify(resumeData?.data || {})], {type: "application/json"}));
+        el.download = `resume-${resumeData?.title || "untitled"}.json`;
         document.body.appendChild(el);
         el.click();
         document.body.removeChild(el);
@@ -182,11 +185,8 @@ export default function RightSidebar() {
     const downloadAsWord = async () => {
         setLoading(true);
         try {
-            const {
-                Document, Packer, Paragraph, TextRun, HeadingLevel,
-                AlignmentType, BorderStyle, Table, TableRow, TableCell, WidthType
-            } = await import("docx");
-            const d = resumeData.data;
+            const { Document, Packer, Paragraph, TextRun, AlignmentType, BorderStyle, Table, TableRow, TableCell, WidthType } = await import("docx");
+            const d = resumeData?.data || {};
             const children = [];
 
             const sectionHeader = (text) => new Paragraph({
@@ -201,12 +201,6 @@ export default function RightSidebar() {
                 indent: { left: 360 },
             });
 
-            const normalPara = (text, opts = {}) => new Paragraph({
-                children: [new TextRun({ text, size: 20, font: "Calibri", ...opts })],
-                spacing: { after: 60 },
-            });
-
-            // HEADER: Name + Position
             children.push(new Paragraph({
                 children: [new TextRun({ text: d.name || "", bold: true, size: 48, color: "1a1040", font: "Calibri" })],
                 alignment: AlignmentType.CENTER,
@@ -218,12 +212,11 @@ export default function RightSidebar() {
                 spacing: { after: 120 },
             }));
 
-            // Contact row as table for perfect alignment
             const contactParts = [];
             if (d.email) contactParts.push(d.email);
             if (d.contactInformation) contactParts.push(d.contactInformation);
             if (d.address) contactParts.push(d.address);
-            if (d.socialMedia?.length) contactParts.push(...d.socialMedia.map(s => s.url));
+            if (d.socialMedia?.length) contactParts.push(...d.socialMedia.map(s => s.link || s.url));
 
             if (contactParts.length) {
                 children.push(new Paragraph({
@@ -233,13 +226,14 @@ export default function RightSidebar() {
                 }));
             }
 
-            // PROFILE
             if (d.summary?.length) {
                 children.push(sectionHeader(d.titles?.profile || "PROFILE"));
-                d.summary.forEach(s => s.description && children.push(normalPara(s.description)));
+                d.summary.forEach(s => s.description && children.push(new Paragraph({
+                    children: [new TextRun({ text: s.description, size: 20, font: "Calibri" })],
+                    spacing: { after: 60 },
+                })));
             }
 
-            // EXPERIENCE
             if (d.workExperience?.length) {
                 children.push(sectionHeader(d.titles?.experience || "EXPERIENCE"));
                 d.workExperience.forEach(w => {
@@ -272,14 +266,12 @@ export default function RightSidebar() {
                     }));
                     children.push(new Table({ rows, width: { size: 100, type: WidthType.PERCENT } }));
                     if (w.description) {
-                        w.description.split(/\n|•/).map(s => s.trim()).filter(Boolean)
-                            .forEach(line => children.push(bulletPara(line)));
+                        w.description.split(/\n|•/).map(s => s.trim()).filter(Boolean).forEach(line => children.push(bulletPara(line)));
                     }
                     children.push(new Paragraph({ text: "", spacing: { after: 120 } }));
                 });
             }
 
-            // EDUCATION
             if (d.educations?.length) {
                 children.push(sectionHeader(d.titles?.education || "EDUCATION"));
                 d.educations.forEach(e => {
@@ -315,7 +307,6 @@ export default function RightSidebar() {
                 });
             }
 
-            // PROJECTS
             if (d.projects?.length) {
                 children.push(sectionHeader(d.titles?.projects || "PROJECTS"));
                 d.projects.forEach(p => {
@@ -324,8 +315,7 @@ export default function RightSidebar() {
                         spacing: { before: 120, after: 40 },
                     }));
                     if (p.description) {
-                        p.description.split(/\n|•/).map(s => s.trim()).filter(Boolean)
-                            .forEach(line => children.push(bulletPara(line)));
+                        p.description.split(/\n|•/).map(s => s.trim()).filter(Boolean).forEach(line => children.push(bulletPara(line)));
                     }
                     if (p.url) children.push(new Paragraph({
                         children: [new TextRun({ text: p.url, size: 18, color: "2563eb", font: "Calibri" })],
@@ -335,13 +325,11 @@ export default function RightSidebar() {
                 });
             }
 
-            // CERTIFICATIONS
             if (d.courses?.length) {
                 children.push(sectionHeader(d.titles?.certification || "CERTIFICATIONS"));
                 d.courses.forEach(c => c.name && children.push(bulletPara(c.name)));
             }
 
-            // SKILLS as table
             if (d.skills?.length) {
                 children.push(sectionHeader(d.titles?.skills || "SKILLS"));
                 const skillChunks = [];
@@ -351,9 +339,7 @@ export default function RightSidebar() {
                     children.push(new Table({
                         rows: [new TableRow({
                             children: chunk.map(s => new TableCell({
-                                children: [new Paragraph({
-                                    children: [new TextRun({ text: `• ${s}`, size: 20, font: "Calibri" })],
-                                })],
+                                children: [new Paragraph({ children: [new TextRun({ text: `• ${s}`, size: 20, font: "Calibri" })] })],
                                 borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } },
                             })),
                         })],
@@ -362,7 +348,6 @@ export default function RightSidebar() {
                 });
             }
 
-            // LANGUAGES
             if (d.languages?.length) {
                 children.push(sectionHeader(d.titles?.languages || "LANGUAGES"));
                 children.push(new Paragraph({
@@ -374,15 +359,13 @@ export default function RightSidebar() {
             }
 
             const doc = new Document({
-                styles: {
-                    default: { document: { run: { font: "Calibri", size: 20 } } },
-                },
+                styles: { default: { document: { run: { font: "Calibri", size: 20 } } } },
                 sections: [{ children }],
             });
             const blob = await Packer.toBlob(doc);
             const el = document.createElement("a");
             el.href = URL.createObjectURL(blob);
-            el.download = `${resumeData.title || "resume"}.docx`;
+            el.download = `${resumeData?.title || "resume"}.docx`;
             document.body.appendChild(el);
             el.click();
             document.body.removeChild(el);
@@ -392,7 +375,7 @@ export default function RightSidebar() {
         setLoading(false);
     };
 
-    const copyAsJson = () => navigator.clipboard.writeText(JSON.stringify(resumeData.data));
+    const copyAsJson = () => navigator.clipboard.writeText(JSON.stringify(resumeData?.data || {}));
 
     const triggerFileInput = (accept) => {
         const input = document.createElement("input");
@@ -406,14 +389,14 @@ export default function RightSidebar() {
                 if (file.name.endsWith(".json")) {
                     const text = await file.text();
                     const parsed = JSON.parse(text);
-                    safeSetResume(parsed);
+                    await safeSetResume(parsed);
                 } else if (file.name.endsWith(".docx")) {
                     const arrayBuffer = await file.arrayBuffer();
                     const mammoth = (await import("mammoth")).default;
                     const result = await mammoth.extractRawText({ arrayBuffer });
                     if (!result || !result.value) throw new Error("Could not read Word file content.");
                     const parsed = parsePlainTextToCV(result.value);
-                    safeSetResume(parsed);
+                    await safeSetResume(parsed);
                 } else if (file.name.endsWith(".pdf")) {
                     const arrayBuffer = await file.arrayBuffer();
                     const pdfjsLib = await new Promise((resolve, reject) => {
@@ -421,8 +404,7 @@ export default function RightSidebar() {
                         const script = document.createElement("script");
                         script.src = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js";
                         script.onload = () => {
-                            window.pdfjsLib.GlobalWorkerOptions.workerSrc =
-                                "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+                            window.pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
                             resolve(window.pdfjsLib);
                         };
                         script.onerror = reject;
@@ -433,7 +415,6 @@ export default function RightSidebar() {
                     for (let i = 1; i <= pdf.numPages; i++) {
                         const page = await pdf.getPage(i);
                         const content = await page.getTextContent();
-                        // Reconstruct line breaks based on Y-position
                         let lastY = null;
                         const pageLines = [];
                         let currentLine = [];
@@ -449,7 +430,7 @@ export default function RightSidebar() {
                         text += pageLines.join("\n") + "\n";
                     }
                     const parsed = parsePlainTextToCV(text);
-                    safeSetResume(parsed);
+                    await safeSetResume(parsed);
                 }
             } catch (err) {
                 alert("Error reading file: " + err.message);
@@ -466,10 +447,10 @@ export default function RightSidebar() {
             setLoading(true);
             try {
                 const jsonData = JSON.parse(text);
-                safeSetResume(jsonData);
+                await safeSetResume(jsonData);
             } catch {
                 const parsed = parsePlainTextToCV(text);
-                safeSetResume(parsed);
+                await safeSetResume(parsed);
             }
             setLoading(false);
         } catch {
@@ -482,11 +463,14 @@ export default function RightSidebar() {
         const name = prompt("Enter section name (e.g. Publications, Awards):");
         if (!name) return;
         const key = name.toLowerCase().replace(/\s+/g, "_");
-        const newData = { ...resumeData.data };
-        if (!newData.customSections) newData.customSections = [];
-        newData.customSections.push({ key, title: name, items: [{ description: "" }] });
-        if (!newData.order.includes(key)) newData.order.push(key);
-        setResumeData({ ...resumeData, data: newData });
+        const currentData = resumeData?.data || {};
+        const newData = {
+            ...currentData,
+            customSections: [...(currentData.customSections || []), { key, title: name, items: [{ description: "" }] }],
+            order: [...(currentData.order || []), key],
+        };
+        const updated = { ...resumeData, data: newData };
+        setResumeData(updated);
     };
 
     return (

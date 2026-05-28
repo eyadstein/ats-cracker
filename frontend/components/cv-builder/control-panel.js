@@ -27,11 +27,11 @@ export default function ControlPanel({id}) {
     const completion = getSectionCompletion();
 
     useEffect(() => {
-        if (id === 'cvnew' && !resumeData.data.name) {
+        if (id === 'cvnew' && !resumeData?.data?.name) {
             setControlPanelIndex(ControlPanelView.PersonalDetailsEditor);
         }
         setIsLoaded(false);
-    }, [id, resumeData.data.name, setControlPanelIndex]);
+    }, [id, resumeData?.data?.name, setControlPanelIndex]);
 
     useEffect(() => {
         setAnimKey(k => k + 1);
@@ -45,21 +45,27 @@ export default function ControlPanel({id}) {
         courses: "Certifications",
         skills: "Skills",
         languages: "Languages",
+        projects: "Projects",
     };
 
     const editors = {
+        contactInformation: <ContactInformationPreview />,
         profile: <ProfileEditor />,
         workExperience: <WorkExperienceEditor />,
         education: <EducationEditor />,
         courses: <CertificationEditor />,
         skills: <SkillsEditor />,
         languages: <LanguagesEditor />,
-        contactInformation: <ContactInformationPreview />,
+        projects: <div className="p-4 bg-gray-50 rounded-xl border border-gray-200"><h3 className="font-bold text-gray-700">Projects</h3><p className="text-sm text-gray-500">Edit projects in the preview panel</p></div>,
     };
 
     const renderEditors = () => {
-        return resumeData.data.order.map((section, index) => {
-            const isDone = completion[section];
+        // GUARD: ensure order exists and only render known sections
+        const order = resumeData?.data?.order || ["contactInformation","profile","workExperience","education","courses","skills","languages"];
+        return order.map((section, index) => {
+            // Skip unknown sections to prevent crashes
+            if (!editors[section]) return null;
+            const isDone = completion?.[section] || false;
             return (
                 <Draggable key={section} draggableId={section} index={index}>
                     {(provided, snapshot) => (
@@ -71,14 +77,13 @@ export default function ControlPanel({id}) {
                                 ...provided.draggableProps.style,
                                 opacity: snapshot.isDragging ? 0.85 : 1,
                                 transform: snapshot.isDragging
-                                    ? `${provided.draggableProps.style?.transform} scale(1.02)`
+                                    ? `${provided.draggableProps.style?.transform || ''} scale(1.02)`
                                     : provided.draggableProps.style?.transform,
                                 boxShadow: snapshot.isDragging ? "0 20px 40px rgba(0,0,0,0.15)" : "none",
                                 borderRadius: snapshot.isDragging ? "16px" : "0",
                                 transition: snapshot.isDragging ? "none" : "box-shadow 0.2s ease",
                             }}
                         >
-                            {/* Section completion badge overlay */}
                             <div className="relative">
                                 {isDone && (
                                     <div className="absolute top-3 right-14 z-10 flex items-center gap-1 bg-green-50 border border-green-200 rounded-full px-2 py-0.5">
@@ -92,7 +97,7 @@ export default function ControlPanel({id}) {
                     )}
                 </Draggable>
             );
-        });
+        }).filter(Boolean);
     };
 
     if (isLoaded) return (
