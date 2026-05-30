@@ -1,4 +1,4 @@
-import "../../globals.css";
+import "../globals.css";
 import {geistMono, geistSans} from "@/app/fonts";
 import Header from "@/components/landing/header";
 import AppProvider from "@/context/app-provider";
