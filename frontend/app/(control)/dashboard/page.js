@@ -1,54 +1,19 @@
 'use client'
 import { ResumeList } from "@/components/dashboard/resume-list";
-import { motion, useInView } from "framer-motion";
-import { useRef, useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
 import useAppContext from "@/hooks/useAppContext";
 
-function ScoreRing({ score = 98 }) {
-  const r = 36;
-  const circ = 2 * Math.PI * r;
-  const [progress, setProgress] = useState(0);
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true });
+function TimeGreeting({ username }) {
+  const [greeting, setGreeting] = useState("Hello");
+  const [emoji, setEmoji] = useState("👋");
 
   useEffect(() => {
-    if (isInView) {
-      setTimeout(() => setProgress(score), 300);
-    }
-  }, [isInView, score]);
+    const hour = new Date().getHours();
+    setGreeting(hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening");
+    setEmoji(hour < 12 ? "☀️" : hour < 17 ? "⚡" : "🌙");
+  }, []);
 
-  return (
-    <div ref={ref} className="flex flex-col items-center gap-1">
-      <svg width="88" height="88" className="-rotate-90">
-        <circle cx="44" cy="44" r={r} fill="none" stroke="rgba(139,92,246,0.15)" strokeWidth="6" />
-        <motion.circle
-          cx="44" cy="44" r={r} fill="none"
-          stroke="url(#scoreGrad)" strokeWidth="6"
-          strokeLinecap="round"
-          strokeDasharray={circ}
-          initial={{ strokeDashoffset: circ }}
-          animate={{ strokeDashoffset: circ - (circ * progress) / 100 }}
-          transition={{ duration: 1.5, ease: "easeOut" }}
-        />
-        <defs>
-          <linearGradient id="scoreGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="#8b5cf6" />
-            <stop offset="100%" stopColor="#4ade80" />
-          </linearGradient>
-        </defs>
-      </svg>
-      <div className="text-center -mt-16 mb-10">
-        <div className="text-xl font-extrabold text-green-400">{progress}%</div>
-        <div className="text-[10px] text-gray-500">ATS</div>
-      </div>
-    </div>
-  );
-}
-
-function TimeGreeting({ username }) {
-  const hour = new Date().getHours();
-  const greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
-  const emoji = hour < 12 ? "☀️" : hour < 17 ? "⚡" : "🌙";
   return (
     <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}
       className="text-gray-500 text-sm font-medium mb-1">
@@ -58,16 +23,12 @@ function TimeGreeting({ username }) {
 }
 
 export default function DashBoardPage() {
-  const { user, getCompletionScore } = useAppContext();
-  const score = getCompletionScore ? getCompletionScore() : 0;
+  const { user } = useAppContext();
 
   return (
     <div className="mx-auto w-full max-w-[1280px] pb-40 overflow-hidden">
-
-      {/* Animated Heading */}
       <div className="dbpx pt-6 md:pt-10">
         <div className="flex w-full flex-col items-center">
-
           <TimeGreeting username={user?.username} />
 
           <motion.h1
@@ -88,7 +49,6 @@ export default function DashBoardPage() {
             What do you want to create?
           </motion.h2>
 
-          {/* Quick stats row */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -119,7 +79,6 @@ export default function DashBoardPage() {
         </div>
       </div>
 
-      {/* Resume List */}
       <motion.div
         className="pt-12 md:pt-20 lg:pt-24"
         id="myResumes"
