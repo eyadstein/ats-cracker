@@ -1,5 +1,5 @@
 import "../globals.css";
-import {geistMono, geistSans} from "@/app/fonts";
+import { geistMono, geistSans } from "@/app/fonts";
 import Header from "@/components/landing/header";
 import AppProvider from "@/context/app-provider";
 
@@ -8,14 +8,13 @@ export const metadata = {
     description: "How ATS Cracker works",
 };
 
-export default function AboutLayout({children}) {
+export default function AboutLayout({ children }) {
     return (
         <html lang="en">
-        <body>
-        <div className={`${geistSans.variable} ${geistMono.variable} antialiased relative flex min-h-screen w-full flex-col items-center`}
-             style={{ background: "linear-gradient(135deg, #0f0c29 0%, #1a1040 40%, #0d1b4b 100%)" }}>
+        <body className="dark-page">
+        <div className={`${geistSans.variable} ${geistMono.variable} antialiased relative flex min-h-screen w-full flex-col items-center`}>
             <AppProvider>
-                <Header atsClass="text-white"/>
+                <Header atsClass="text-white" />
                 {children}
             </AppProvider>
         </div>

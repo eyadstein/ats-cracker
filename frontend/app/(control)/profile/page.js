@@ -5,6 +5,42 @@ import { useState, useEffect } from "react";
 import { cvListAction } from "@/actions/cvs";
 import Link from "next/link";
 
+const TIERS = [
+    {
+        name: "Free",
+        price: "$0",
+        period: "forever",
+        color: "border-gray-200",
+        badge: "bg-gray-100 text-gray-600",
+        current: true,
+        features: [
+            "Unlimited resumes",
+            "PDF & Word export",
+            "ATS-optimized format",
+            "JSON import/export",
+            "Drag & drop sections",
+            "All current features",
+        ],
+    },
+    {
+        name: "Pro",
+        price: "$4.99",
+        period: "/ month",
+        color: "border-violet-400",
+        badge: "bg-violet-100 text-violet-700",
+        current: false,
+        tag: "Coming Soon",
+        features: [
+            "Everything in Free",
+            "AI CV rewriter",
+            "ATS score breakdown",
+            "Cover letter generator",
+            "Job match analyzer",
+            "Priority support",
+        ],
+    },
+];
+
 export default function ProfilePage() {
     const { user, logout, setResumeList, resumeList } = useAppContext();
     const [cvCount, setCvCount] = useState(0);
@@ -49,7 +85,7 @@ export default function ProfilePage() {
                         <p className="text-gray-500 mt-1">{user.email}</p>
                         <div className="flex flex-wrap gap-2 mt-3 justify-center sm:justify-start">
                             <span className="inline-flex items-center gap-1.5 bg-violet-50 border border-violet-200 text-violet-700 text-xs font-semibold rounded-full px-3 py-1">
-                                <span className="w-1.5 h-1.5 rounded-full bg-green-500"/>Active Account
+                                <span className="w-1.5 h-1.5 rounded-full bg-green-500" />Free Plan
                             </span>
                         </div>
                     </div>
@@ -78,6 +114,55 @@ export default function ProfilePage() {
                 ))}
             </motion.div>
 
+            {/* Pricing Tiers */}
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}
+                className="mb-6">
+                <h3 className="text-lg font-extrabold text-gray-900 mb-4">Your Plan</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {TIERS.map((tier, i) => (
+                        <motion.div key={tier.name}
+                            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.3 + i * 0.1 }}
+                            whileHover={{ y: -4 }}
+                            className={`rounded-2xl border-2 ${tier.color} bg-white p-6 relative overflow-hidden`}>
+                            {tier.tag && (
+                                <div className="absolute top-4 right-4 bg-yellow-100 border border-yellow-300 text-yellow-700 text-[10px] font-bold rounded-full px-2 py-0.5">
+                                    {tier.tag}
+                                </div>
+                            )}
+                            {tier.current && (
+                                <div className="absolute top-4 right-4 bg-green-100 border border-green-300 text-green-700 text-[10px] font-bold rounded-full px-2 py-0.5">
+                                    Current Plan
+                                </div>
+                            )}
+                            <div className="mb-4">
+                                <span className={`inline-block text-xs font-bold rounded-full px-3 py-1 mb-3 ${tier.badge}`}>{tier.name}</span>
+                                <div className="flex items-baseline gap-1">
+                                    <span className="text-3xl font-extrabold text-gray-900">{tier.price}</span>
+                                    <span className="text-gray-400 text-sm">{tier.period}</span>
+                                </div>
+                            </div>
+                            <ul className="space-y-2 mb-5">
+                                {tier.features.map(f => (
+                                    <li key={f} className="flex items-center gap-2 text-sm text-gray-600">
+                                        <span className="text-green-500 font-bold">✓</span>{f}
+                                    </li>
+                                ))}
+                            </ul>
+                            {tier.current ? (
+                                <div className="w-full py-2.5 rounded-xl bg-gray-100 text-gray-500 text-sm font-semibold text-center">Active</div>
+                            ) : (
+                                <Link href="/ai">
+                                    <div className="w-full py-2.5 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 text-white text-sm font-bold text-center cursor-pointer hover:opacity-90 transition-opacity">
+                                        Coming Soon →
+                                    </div>
+                                </Link>
+                            )}
+                        </motion.div>
+                    ))}
+                </div>
+            </motion.div>
+
             {/* My Resumes */}
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
                 className="bg-white rounded-2xl shadow-card border border-gray-100 p-6 mb-6">
@@ -88,7 +173,7 @@ export default function ProfilePage() {
                     </Link>
                 </div>
                 {loading ? (
-                    <div className="flex gap-3">{[1,2,3].map(i => <div key={i} className="h-16 flex-1 rounded-xl bg-gray-100 animate-pulse"/>)}</div>
+                    <div className="flex gap-3">{[1, 2, 3].map(i => <div key={i} className="h-16 flex-1 rounded-xl bg-gray-100 animate-pulse" />)}</div>
                 ) : resumeList.length === 0 ? (
                     <div className="text-center py-8 text-gray-400">
                         <div className="text-4xl mb-2">📝</div>
