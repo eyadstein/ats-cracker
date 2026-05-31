@@ -1,15 +1,18 @@
-import React, {useContext} from 'react';
+import React, { useContext } from 'react';
 import DraggableUtil from "@/components/cv-builder/utils/draggable-util";
 import DateComponent from "@/components/general/date-component";
 
+function stripHtml(html) {
+    if (!html) return "";
+    return html.replace(/<[^>]*>/g, '');
+}
 
 function EducationItemBody(item) {
     return <>
         <div className="flex flex-row justify-between space-y-1">
             <p className="content">
-                <span className="i-bold"> {item.degree}</span>
-                <span className="pl-1">({item.school})</span>
-
+                <span className="i-bold"> {stripHtml(item.degree)}</span>
+                <span className="pl-1">({stripHtml(item.school)})</span>
             </p>
             <DateComponent
                 startYear={item.startYear}
@@ -19,19 +22,16 @@ function EducationItemBody(item) {
         </div>
 
         {item.notes && item.notes.length > 0 &&
-
             <p className="content i-bold pl-2 mt-0 mb-2">
-                <span className="content hyphens-auto">{item.notes}</span>
+                <span className="content hyphens-auto">{stripHtml(item.notes)}</span>
             </p>}
     </>;
 }
 
-const EducationItem = ({draggableId, index, item, type,keyData,isDraggable}) => {
-
-    if(!isDraggable) {
+const EducationItem = ({ draggableId, index, item, type, keyData, isDraggable }) => {
+    if (!isDraggable) {
         return EducationItemBody(item);
     }
-
 
     return <DraggableUtil draggableId={draggableId} index={index} keyData={keyData}>
         {EducationItemBody(item)}

@@ -1,38 +1,57 @@
-import {useRef, useState} from "react";
+import { useRef, useState } from "react";
 import useAppContext from "@/hooks/useAppContext";
-import {MdDelete} from "react-icons/md";
+import { MdDelete } from "react-icons/md";
 import TextInput from "@/components/general/text-input";
 import Grid from "@/components/general/grid";
 import LinkModal from "@/components/general/link-modal";
-import {showErrorAlert} from "@/lib/alerts";
+import { showErrorAlert } from "@/lib/alerts";
 
-const CvLinkItem = ({title,onRemove,className, ...props}) => {
+function sanitizeUrl(url) {
+    if (!url) return "";
+    // Prevent javascript: and data: URLs
+    const lower = url.trim().toLowerCase();
+    if (lower.startsWith('javascript:') || lower.startsWith('data:') || lower.startsWith('vbscript:')) {
+        return "";
+    }
+    // Ensure http/https prefix
+    if (!lower.startsWith('http://') && !lower.startsWith('https://')) {
+        return 'https://' + url;
+    }
+    return url;
+}
+
+const CvLinkItem = ({ title, onRemove, className, ...props }) => {
     const divRef = useRef(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const {resumeData, setResumeData, globalRefs} = useAppContext();
+    const { resumeData, setResumeData, globalRefs } = useAppContext();
     const data = resumeData?.data?.socialMedia?.find((item) => item.socialMedia === title) || {};
-
 
     const [link, setLink] = useState(data.link || "");
 
     const onLinkUpdate = (e) => {
+        const sanitized = sanitizeUrl(e);
+        if (!sanitized) {
+            showErrorAlert("Invalid URL format");
+            return;
+        }
+        
         const newSocialMedia = [...resumeData.data.socialMedia];
         const index = newSocialMedia.findIndex((x) => x.socialMedia === title);
-        newSocialMedia[index].link = e;
-        const displayUrl = prepareDisplayUrl(e);
-        if (displayUrl){
+        if (index === -1) return;
+        
+        newSocialMedia[index].link = sanitized;
+        const displayUrl = prepareDisplayUrl(sanitized);
+        if (displayUrl) {
             newSocialMedia[index].displayName = displayUrl;
         }
         setResumeData({
             ...resumeData,
-            data:{
+            data: {
                 ...resumeData.data,
                 socialMedia: newSocialMedia
             }
         });
-        setLink(e);
-
-
+        setLink(sanitized);
     }
 
     const prepareDisplayUrl = (url) => {
@@ -41,7 +60,6 @@ const CvLinkItem = ({title,onRemove,className, ...props}) => {
             const simplifiedHostname = hostname.startsWith("www.") ? hostname.slice(4) : hostname;
             return `${simplifiedHostname}${pathname}`;
         } catch (error) {
-            showErrorAlert("Invalid URL");
             return null;
         }
     };
@@ -50,9 +68,9 @@ const CvLinkItem = ({title,onRemove,className, ...props}) => {
         <LinkModal link={link} setLink={onLinkUpdate} divRef={divRef} isModalOpen={isModalOpen} setIsModalOpen={setIsModalOpen} />
         <Grid cols={1} className="w-full md:grid-cols-[auto_min-content_min-content] md:gap-2 xl:gap-2">
             <TextInput className={"mb-4"} name={`cv${title}`} type={"text"}
-                       value={link}
-                       onChange={()=>{}}
-                       title={title} hint={`Enter ${title} URL`} isRequired={true}/>
+                value={link}
+                onChange={() => { }}
+                title={title} hint={`Enter ${title} URL`} isRequired={true} />
 
             <button
                 onClick={() => setIsModalOpen(true)}
@@ -62,12 +80,10 @@ const CvLinkItem = ({title,onRemove,className, ...props}) => {
 
             <button onClick={onRemove}
                 className={"mt-2 border-none cursor-pointer appearance-none touch-manipulation flex items-center justify-center focus-visible:outline-blue-600 font-bold hover:opacity-80 bg-red-50 text-red-800 ml-1 h-12 w-12 min-w-min rounded-lg"}>
-                <MdDelete className={"text-red-800"}/>
+                <MdDelete className={"text-red-800"} />
             </button>
 
         </Grid>
-
-
     </div>;
 };
 export default CvLinkItem;

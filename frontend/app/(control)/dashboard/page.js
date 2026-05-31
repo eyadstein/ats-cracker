@@ -4,6 +4,11 @@ import { ResumeList } from "@/components/dashboard/resume-list";
 import useAppContext from "@/hooks/useAppContext";
 import Link from "next/link";
 
+function stripHtml(html) {
+    if (!html) return "";
+    return html.replace(/<[^>]*>/g, '');
+}
+
 export default function DashboardPage() {
     const { user, resumeList } = useAppContext();
 
@@ -12,7 +17,7 @@ export default function DashboardPage() {
             {/* Welcome */}
             <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
                 <h1 className="text-3xl font-extrabold text-gray-900">
-                    Welcome back{user?.username ? `, ${user.username}` : ""}! 👋
+                    Welcome back{user?.username ? `, ${stripHtml(user.username)}` : ""}! 👋
                 </h1>
                 <p className="text-gray-500 mt-1">Build a resume that gets past every ATS filter.</p>
             </motion.div>

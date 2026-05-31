@@ -5,10 +5,17 @@ import * as ServerActions from "@/actions/register";
 import { showErrorAlert } from "@/lib/alerts";
 import useAppContext from "@/hooks/useAppContext";
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "https://ats-cracker-production.up.railway.app";
-const GITHUB_CLIENT_ID = process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID || "Ov23liOotRANg0xO7IPc";
-const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "";
-const MICROSOFT_CLIENT_ID = process.env.NEXT_PUBLIC_MICROSOFT_CLIENT_ID || "";
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+const GITHUB_CLIENT_ID = process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID;
+const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+const MICROSOFT_CLIENT_ID = process.env.NEXT_PUBLIC_MICROSOFT_CLIENT_ID;
+
+// Generate random state for CSRF protection
+function generateState() {
+    const array = new Uint8Array(16);
+    crypto.getRandomValues(array);
+    return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
+}
 
 export default function RegisterModal({ onChangeModal, closeModal }) {
     const [formData, setFormData] = useState({ email: "", password: "", confirm_password: "", username: "" });
@@ -50,9 +57,11 @@ export default function RegisterModal({ onChangeModal, closeModal }) {
             showErrorAlert("Google OAuth not configured.");
             return;
         }
+        const state = generateState();
+        sessionStorage.setItem('oauth_state', state);
         const redirectUri = `${BACKEND_URL}/auth/google/callback/`;
         const scope = "openid email profile";
-        const url = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${GOOGLE_CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${encodeURIComponent(scope)}&access_type=offline`;
+        const url = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${GOOGLE_CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${encodeURIComponent(scope)}&access_type=offline&state=${state}`;
         window.location.href = url;
     };
 
@@ -61,14 +70,22 @@ export default function RegisterModal({ onChangeModal, closeModal }) {
             showErrorAlert("Microsoft OAuth not configured.");
             return;
         }
+        const state = generateState();
+        sessionStorage.setItem('oauth_state', state);
         const redirectUri = `${BACKEND_URL}/auth/microsoft/callback/`;
         const scope = "openid email profile User.Read";
-        const url = `https://login.microsoftonline.com/common/oauth2/v2.0/authorize?client_id=${MICROSOFT_CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${encodeURIComponent(scope)}`;
+        const url = `https://login.microsoftonline.com/common/oauth2/v2.0/authorize?client_id=${MICROSOFT_CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${encodeURIComponent(scope)}&state=${state}`;
         window.location.href = url;
     };
 
     const githubLogin = () => {
-        const url = `https://github.com/login/oauth/authorize?client_id=${GITHUB_CLIENT_ID}&scope=user:email`;
+        if (!GITHUB_CLIENT_ID) {
+            showErrorAlert("GitHub OAuth not configured.");
+            return;
+        }
+        const state = generateState();
+        sessionStorage.setItem('oauth_state', state);
+        const url = `https://github.com/login/oauth/authorize?client_id=${GITHUB_CLIENT_ID}&scope=user:email&state=${state}`;
         window.location.href = url;
     };
 

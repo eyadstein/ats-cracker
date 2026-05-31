@@ -5,8 +5,13 @@ import MinimizedCard from "@/components/general/minimized-card";
 import DroppableUtil from "@/components/cv-builder/utils/droppable-utils";
 import ProfileSummaryItem from "@/components/cv-builder/control-components/items/profile-item-summary";
 
+function stripHtml(html) {
+    if (!html) return "";
+    return html.replace(/<[^>]*>/g, '');
+}
+
 const ProfileEditor = () => {
-    const {setResumeData,resumeData,syncResumeData} = useAppContext();
+    const {setResumeData, resumeData, syncResumeData} = useAppContext();
     const title = "Profile";
     const draggableId = "profile";
     const type = "PROFILE";
@@ -49,9 +54,9 @@ const ProfileEditor = () => {
     };
 
     const OnEditItem = (e, index) => {
-        const value = e.target.innerText.trim();
+        const value = stripHtml(e.target.innerText.trim());
         if (value === "") {
-            OnRemoveItem(index); // Remove item if text is empty
+            OnRemoveItem(index);
             return;
         }
 
@@ -68,7 +73,7 @@ const ProfileEditor = () => {
         });
     };
 
-    const finalState= (state) => {
+    const finalState = (state) => {
         setResumeData(state);
         syncResumeData(state);
     }
@@ -80,8 +85,6 @@ const ProfileEditor = () => {
         item={item}
         Icon={FaUserCircle} haveAddButton={true}
     >
-        {/*Main Content*/}
-
         <DroppableUtil type={type} droppableId={draggableId}>
             {(item?.data?.summary || []).map((summary, index) => {
                 return <ProfileSummaryItem draggableId={`${type}-${index}`} keyData={`${type}-${index}`}
@@ -93,7 +96,6 @@ const ProfileEditor = () => {
             })}
         </DroppableUtil>
     </MinimizedCard>
-
 }
 
 export default ProfileEditor;

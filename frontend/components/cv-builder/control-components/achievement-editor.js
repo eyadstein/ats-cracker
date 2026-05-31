@@ -5,15 +5,19 @@ import MinimizedCard from "@/components/general/minimized-card";
 import DroppableUtil from "@/components/cv-builder/utils/droppable-utils";
 import GeneralListItem from "@/components/cv-builder/control-components/items/general-list-item";
 
+function stripHtml(html) {
+    if (!html) return "";
+    return html.replace(/<[^>]*>/g, '');
+}
+
 const AchievementEditor = ({index}) => {
     const draggableId = "experience-achievement";
     const type = "ACHIEVEMENT";
     const {setResumeData, resumeData} = useAppContext();
     const achievements = resumeData?.data?.workExperience?.[index]?.achievements || [];
 
-
     const OnEditAchievementItem = (e, achievementIndex) => {
-        const value = e.target.innerText;
+        const value = stripHtml(e.target.innerText);
         if (value === "") {
             OnRemoveAchievementItem(achievementIndex);
             return;
@@ -66,8 +70,6 @@ const AchievementEditor = ({index}) => {
         });
     };
 
-
-
     return (
         <MinimizedCard
             haveAddButton={true}
@@ -78,7 +80,6 @@ const AchievementEditor = ({index}) => {
             canHaveOnBackMinimize={false}
             canEditTitle={false}
             OnClickAddButton={OnAddAchievementItem}>
-
 
             <DroppableUtil droppableId={`${draggableId}-${index}`} type={type}>
                 {
@@ -99,6 +100,5 @@ const AchievementEditor = ({index}) => {
             </DroppableUtil>
         </MinimizedCard>
     )
-
 };
 export default AchievementEditor;

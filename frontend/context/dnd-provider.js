@@ -1,21 +1,21 @@
 'use client';
 
-import {Suspense, useEffect, useState} from 'react';
+import { useEffect, useState } from 'react';
 import { DndContext } from "@/context/dnd-context";
 import dynamic from 'next/dynamic';
-import { resetServerContext } from "react-beautiful-dnd"
+import { resetServerContext } from "@hello-pangea/dnd";
 
 // Dynamically import DragDropContext, Droppable, and Draggable with SSR disabled
 const DragDropContext = dynamic(
-    () => import("react-beautiful-dnd").then((mod) => mod.DragDropContext),
+    () => import("@hello-pangea/dnd").then((mod) => mod.DragDropContext),
     { ssr: false }
 );
 const Droppable = dynamic(
-    () => import("react-beautiful-dnd").then((mod) => mod.Droppable),
+    () => import("@hello-pangea/dnd").then((mod) => mod.Droppable),
     { ssr: false }
 );
 const Draggable = dynamic(
-    () => import("react-beautiful-dnd").then((mod) => mod.Draggable),
+    () => import("@hello-pangea/dnd").then((mod) => mod.Draggable),
     { ssr: false }
 );
 

@@ -5,6 +5,11 @@ import { useState, useEffect } from "react";
 import { cvListAction } from "@/actions/cvs";
 import Link from "next/link";
 
+function stripHtml(html) {
+    if (!html) return "";
+    return html.replace(/<[^>]*>/g, '');
+}
+
 const TIERS = [
     {
         name: "Free",
@@ -58,7 +63,7 @@ export default function ProfilePage() {
 
     if (!user) return null;
 
-    const initials = (user.username || user.email || "U").slice(0, 2).toUpperCase();
+    const initials = stripHtml((user.username || user.email || "U")).slice(0, 2).toUpperCase();
 
     const handleLogout = async () => {
         try { await fetch("/api/logout", { method: "POST" }); } catch {}
@@ -81,8 +86,8 @@ export default function ProfilePage() {
                         {initials}
                     </div>
                     <div className="flex-1 text-center sm:text-left">
-                        <h2 className="text-2xl font-extrabold text-gray-900">{user.username || "User"}</h2>
-                        <p className="text-gray-500 mt-1">{user.email}</p>
+                        <h2 className="text-2xl font-extrabold text-gray-900">{stripHtml(user.username) || "User"}</h2>
+                        <p className="text-gray-500 mt-1">{stripHtml(user.email)}</p>
                         <div className="flex flex-wrap gap-2 mt-3 justify-center sm:justify-start">
                             <span className="inline-flex items-center gap-1.5 bg-violet-50 border border-violet-200 text-violet-700 text-xs font-semibold rounded-full px-3 py-1">
                                 <span className="w-1.5 h-1.5 rounded-full bg-green-500" />Free Plan
@@ -189,10 +194,10 @@ export default function ProfilePage() {
                                 onClick={() => window.location.href = `/dashboard/${cv.id}`}>
                                 <div className="flex items-center gap-3">
                                     <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-500 to-indigo-500 flex items-center justify-center text-white text-xs font-bold">
-                                        {(cv.title || "R").charAt(0).toUpperCase()}
+                                        {(stripHtml(cv.title) || "R").charAt(0).toUpperCase()}
                                     </div>
                                     <div>
-                                        <div className="text-sm font-semibold text-gray-800">{cv.title || "Untitled"}</div>
+                                        <div className="text-sm font-semibold text-gray-800">{stripHtml(cv.title) || "Untitled"}</div>
                                         <div className="text-xs text-gray-400">Resume</div>
                                     </div>
                                 </div>
@@ -209,8 +214,8 @@ export default function ProfilePage() {
                 <h3 className="text-lg font-extrabold text-gray-900 mb-4">Account Info</h3>
                 <div className="space-y-3">
                     {[
-                        { label: "Username", value: user.username || "—", icon: "👤" },
-                        { label: "Email", value: user.email || "—", icon: "📧" },
+                        { label: "Username", value: stripHtml(user.username) || "—", icon: "👤" },
+                        { label: "Email", value: stripHtml(user.email) || "—", icon: "📧" },
                     ].map(item => (
                         <div key={item.label} className="flex items-center gap-3 p-3 rounded-xl bg-gray-50">
                             <span className="text-lg">{item.icon}</span>

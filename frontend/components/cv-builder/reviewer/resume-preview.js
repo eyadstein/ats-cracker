@@ -1,5 +1,5 @@
 'use client'
-import {useRef} from "react";
+import { useRef } from "react";
 import ResumePage from "@/components/cv-builder/reviewer/resume-page";
 import ContactInformationCv from "@/components/cv-builder/reviewer/contact-information-cv";
 import ProfileCv from "@/components/cv-builder/reviewer/profile-cv";
@@ -10,11 +10,25 @@ import SkillsCv from "@/components/cv-builder/reviewer/skills-preview";
 import LanguagesSection from "@/components/cv-builder/reviewer/language-preview";
 import useAppContext from "@/hooks/useAppContext";
 
-function ResumeContainer({children}) {
+function stripHtml(html) {
+    if (!html) return "";
+    return html.replace(/<[^>]*>/g, '');
+}
+
+function sanitizeUrl(url) {
+    if (!url) return "";
+    const lower = url.trim().toLowerCase();
+    if (lower.startsWith('javascript:') || lower.startsWith('data:') || lower.startsWith('vbscript:')) {
+        return "#";
+    }
+    return url;
+}
+
+function ResumeContainer({ children }) {
     return (
         <div className={"sidebar:flex sticky top-0 hidden h-screen max-h-screen grow overflow-auto scroll-smooth pb-4 pt-8"} id={"resumePreview"}>
-            <div style={{width: "620px", minHeight: "1136px", position: "relative"}}>
-                <div style={{transform: "scale(0.780856)", transformOrigin: "top left", position: "absolute", top: 0, left: 0}}>
+            <div style={{ width: "620px", minHeight: "1136px", position: "relative" }}>
+                <div style={{ transform: "scale(0.780856)", transformOrigin: "top left", position: "absolute", top: 0, left: 0 }}>
                     {children}
                 </div>
             </div>
@@ -22,7 +36,7 @@ function ResumeContainer({children}) {
     );
 }
 
-export function ListContainer({children, cv, className, onClick}) {
+export function ListContainer({ children, cv, className, onClick }) {
     const targetWidth = 180;
     const targetHeight = 250;
     const originalWidth = 620;
@@ -30,12 +44,12 @@ export function ListContainer({children, cv, className, onClick}) {
     const scale = Math.min(targetWidth / originalWidth, targetHeight / originalHeight);
     return (
         <div onClick={onClick} className={`flex flex-col justify-center items-center cursor-pointer ${className}`}>
-            <div className="select-none overflow-hidden rounded-md border border-solid border-white hover:opacity-70" style={{width: `${targetWidth}px`, height: `${targetHeight}px`, position: "relative"}}>
-                <div style={{width: `${originalWidth}px`, height: `${originalHeight}px`, transform: `scale(${scale})`, transformOrigin: "top left", position: "absolute", pointerEvents: "none", top: 0, left: 0}}>
+            <div className="select-none overflow-hidden rounded-md border border-solid border-white hover:opacity-70" style={{ width: `${targetWidth}px`, height: `${targetHeight}px`, position: "relative" }}>
+                <div style={{ width: `${originalWidth}px`, height: `${originalHeight}px`, transform: `scale(${scale})`, transformOrigin: "top left", position: "absolute", pointerEvents: "none", top: 0, left: 0 }}>
                     {children}
                 </div>
             </div>
-            <span className="mt-[10px] text-xs font-bold uppercase">{cv?.title || "Resume"}</span>
+            <span className="mt-[10px] text-xs font-bold uppercase">{stripHtml(cv?.title) || "Resume"}</span>
         </div>
     );
 }
@@ -49,10 +63,10 @@ function ProjectsCv({ data, className }) {
                 {d.titles?.projects || "PROJECTS"}
             </div>
             {d.projects.map((p, i) => (
-                <div key={i} style={{ marginBottom: "10px" }}>
-                    <div style={{ fontWeight: 600, fontSize: "11.5pt" }}>{p.name}</div>
-                    {p.url && <div style={{ fontSize: "10pt", color: "#2563eb" }}>{p.url}</div>}
-                    {p.description && <div style={{ fontSize: "10.5pt", whiteSpace: "pre-wrap" }}>{p.description}</div>}
+                <div key={`project-${i}`} style={{ marginBottom: "10px" }}>
+                    <div style={{ fontWeight: 600, fontSize: "11.5pt" }}>{stripHtml(p.name)}</div>
+                    {p.url && <div style={{ fontSize: "10pt", color: "#2563eb" }}>{sanitizeUrl(p.url)}</div>}
+                    {p.description && <div style={{ fontSize: "10.5pt", whiteSpace: "pre-wrap" }}>{stripHtml(p.description)}</div>}
                 </div>
             ))}
         </div>
@@ -66,22 +80,21 @@ function CustomSectionCv({ data, sectionKey, className }) {
     return (
         <div className={className || ""}>
             <div style={{ fontSize: "13pt", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: "6px", color: "#1a1040" }}>
-                {section.title}
+                {stripHtml(section.title)}
             </div>
             {section.items?.map((item, i) => (
-                <div key={i} style={{ fontSize: "10.5pt", marginBottom: "4px" }}>{item.description}</div>
+                <div key={`custom-${i}`} style={{ fontSize: "10.5pt", marginBottom: "4px" }}>{stripHtml(item.description)}</div>
             ))}
         </div>
     );
 }
 
-export function ResumePreview({data, isListItemPreview=false}) {
+export function ResumePreview({ data, isListItemPreview = false }) {
     const contentRef = useRef(null);
-    const {resumeData} = useAppContext();
+    const { resumeData } = useAppContext();
     const cvData = isListItemPreview ? data : resumeData;
 
     const renderSections = () => {
-        // BUILD SAFE DATA — guarantee every array/property exists
         const rawData = cvData?.data || {};
         const safeData = {
             data: {
@@ -99,7 +112,7 @@ export function ResumePreview({data, isListItemPreview=false}) {
                 skills: rawData.skills || [],
                 languages: rawData.languages || [],
                 customSections: rawData.customSections || [],
-                order: rawData.order || ["contactInformation","profile","workExperience","education","courses","skills","languages"],
+                order: rawData.order || ["contactInformation", "profile", "workExperience", "education", "courses", "skills", "languages"],
                 titles: {
                     profile: "PROFILE", experience: "EXPERIENCE", education: "EDUCATION",
                     certification: "CERTIFICATION", skills: "SKILLS", languages: "LANGUAGES", projects: "PROJECTS",
@@ -129,14 +142,13 @@ export function ResumePreview({data, isListItemPreview=false}) {
             projects: <ProjectsCv data={safeData} className="mt-2" />,
         };
 
-        // Add custom sections dynamically
         if (safeData.data.customSections?.length) {
             safeData.data.customSections.forEach(s => {
                 sections[s.key] = <CustomSectionCv data={safeData} sectionKey={s.key} className="mt-2" />;
             });
         }
 
-        const order = safeData.data.order || ["contactInformation","profile","workExperience","education","courses","skills","languages"];
+        const order = safeData.data.order || ["contactInformation", "profile", "workExperience", "education", "courses", "skills", "languages"];
         return order.map((section, idx) => sections[section] || null).filter(Boolean);
     };
 
@@ -147,10 +159,10 @@ export function ResumePreview({data, isListItemPreview=false}) {
     </div>
 }
 
-export function ResumePreviewer({data}) {
+export function ResumePreviewer({ data }) {
     return (
         <ResumeContainer>
-            <ResumePreview data={data}/>
+            <ResumePreview data={data} />
         </ResumeContainer>
     );
 }

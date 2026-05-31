@@ -3,16 +3,20 @@ import useAppContext from "@/hooks/useAppContext";
 import {FaBusinessTime} from "react-icons/fa";
 import MinimizedCard from "@/components/general/minimized-card";
 import DroppableUtil from "@/components/cv-builder/utils/droppable-utils";
-import {ControlPanelView,ControlPanelMode} from "@/components/cv-builder/control-components/utils/enums";
+import {ControlPanelView, ControlPanelMode} from "@/components/cv-builder/control-components/utils/enums";
 import WorkExperienceItem from "@/components/cv-builder/control-components/items/work-experience-item";
 
+function stripHtml(html) {
+    if (!html) return "";
+    return html.replace(/<[^>]*>/g, '');
+}
+
 const WorkExperienceEditor = ({}) => {
-    const {setResumeData,resumeData,setControlPanelIndex,setCurrentEditIndex,syncResumeData} = useAppContext();
+    const {setResumeData, resumeData, setControlPanelIndex, setCurrentEditIndex, syncResumeData} = useAppContext();
     const title = "Experience";
     const draggableId = "experience";
     const type = "EXPERIENCE";
     const item = resumeData;
-
 
     const OnClickAddButton = () => {
         const newWorkExperienceItem = {
@@ -74,12 +78,24 @@ const WorkExperienceEditor = ({}) => {
         setControlPanelIndex(ControlPanelView.WorkExperienceEditor);
     };
 
-
-
-
-    const finalState= (state) => {
-        setResumeData(state);
-        syncResumeData(state);
+    const finalState = (state) => {
+        // Sanitize all text fields before saving
+        const sanitized = {
+            ...state,
+            data: {
+                ...state.data,
+                workExperience: state.data.workExperience.map(we => ({
+                    ...we,
+                    company: stripHtml(we.company),
+                    position: stripHtml(we.position),
+                    location: stripHtml(we.location),
+                    companyField: stripHtml(we.companyField),
+                    workType: stripHtml(we.workType),
+                }))
+            }
+        };
+        setResumeData(sanitized);
+        syncResumeData(sanitized);
     }
 
     return <MinimizedCard
@@ -89,9 +105,7 @@ const WorkExperienceEditor = ({}) => {
         item={item}
         Icon={FaBusinessTime} haveAddButton={true}
         viewIndex={ControlPanelView.WorkExperienceEditor}
-
     >
-        {/*Main Content*/}
         <DroppableUtil type={type} droppableId={draggableId}>
             {item.data.workExperience.map((workExperienceItem, index) => {
                 return <WorkExperienceItem draggableId={`${type}-${index}`} keyData={`${type}-${index}`}
@@ -101,13 +115,10 @@ const WorkExperienceEditor = ({}) => {
                                            OnEditItem={OnEditItem}
                                            index={index}
                                            itemWorkExperience={workExperienceItem}
-                                             type={type}/>
-
-
+                                           type={type}/>
             })}
         </DroppableUtil>
     </MinimizedCard>
-
 }
 
 export default WorkExperienceEditor;

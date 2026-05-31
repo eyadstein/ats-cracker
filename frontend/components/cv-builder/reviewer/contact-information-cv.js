@@ -1,13 +1,30 @@
 import useAppContext from "@/hooks/useAppContext";
 import HorizontalLine from "@/components/general/horizontal-line";
-import {SocialMediaIconLink} from "@/components/cv-builder/reviewer/widgets/social-media-link";
+import { SocialMediaIconLink } from "@/components/cv-builder/reviewer/widgets/social-media-link";
 import ContactSpace from "@/components/general/contact-space";
 
-const ContactInformationCv = ({data, isListItemPreview}) => {
-    const {resumeData} = useAppContext();
+function sanitizeEmail(email) {
+    if (!email) return "";
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email) ? email : "";
+}
+
+function sanitizePhone(phone) {
+    if (!phone) return "";
+    // Allow digits, spaces, +, -, (, )
+    const phoneRegex = /^[\d\s+\-().]+$/;
+    return phoneRegex.test(phone) ? phone : "";
+}
+
+const ContactInformationCv = ({ data, isListItemPreview }) => {
+    const { resumeData } = useAppContext();
     const cvData = isListItemPreview ? data : resumeData;
     const d = cvData?.data || {};
     const hasContactInfo = d.name || d.position || d.address || d.email || d.contactInformation || (d.socialMedia?.length > 0);
+
+    const safeEmail = sanitizeEmail(d.email);
+    const safePhone = sanitizePhone(d.contactInformation);
 
     return (
         <>
@@ -17,23 +34,23 @@ const ContactInformationCv = ({data, isListItemPreview}) => {
                     <span className="profession-cv mt-1">{d.position || ""}</span>
                 </div>
 
-                {d.name && d.position && <HorizontalLine id={"BetweenNameAndContact"} className={"mb-2 w-full"}/>}
+                {d.name && d.position && <HorizontalLine id={"BetweenNameAndContact"} className={"mb-2 w-full"} />}
 
                 <div className="w-full flex flex-wrap justify-center text-center gap-y-2">
                     {d.address && (
                         <>
-                            <a>{d.address}</a>
-                            {(d.email || d.contactInformation) && <ContactSpace/>}
+                            <span>{d.address}</span>
+                            {(safeEmail || safePhone) && <ContactSpace />}
                         </>
                     )}
-                    {d.email && (
+                    {safeEmail && (
                         <>
-                            <a aria-label="email address" href={`mailto:${d.email}`}>{d.email}</a>
-                            {d.contactInformation && <ContactSpace/>}
+                            <a aria-label="email address" href={`mailto:${safeEmail}`}>{safeEmail}</a>
+                            {safePhone && <ContactSpace />}
                         </>
                     )}
-                    {d.contactInformation && (
-                        <a aria-label="Phone Number" href={`tel:${d.contactInformation}`}>{d.contactInformation}</a>
+                    {safePhone && (
+                        <a aria-label="Phone Number" href={`tel:${safePhone}`}>{safePhone}</a>
                     )}
                 </div>
 
@@ -52,7 +69,7 @@ const ContactInformationCv = ({data, isListItemPreview}) => {
                     })}
                 </div>
             </div>
-            {hasContactInfo && <HorizontalLine className={"mt-2"}/>}
+            {hasContactInfo && <HorizontalLine className={"mt-2"} />}
         </>
     );
 }

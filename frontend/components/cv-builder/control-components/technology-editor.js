@@ -4,16 +4,19 @@ import DroppableUtil from "@/components/cv-builder/utils/droppable-utils";
 import TechnologyItem from "@/components/cv-builder/control-components/items/technology-item";
 import MinimizedCard from "@/components/general/minimized-card";
 
+function stripHtml(html) {
+    if (!html) return "";
+    return html.replace(/<[^>]*>/g, '');
+}
+
 const TechnologyEditor = ({index}) => {
     const draggableId = "experience-technology";
     const type = "TECHNOLOGY";
     const {setResumeData, resumeData} = useAppContext();
     const technologies = resumeData?.data?.workExperience?.[index]?.technologies || [];
 
-
-
     const OnEditTechnologyItem = (e, technologyIndex) => {
-        const value = e.target.innerText.trim();
+        const value = stripHtml(e.target.innerText.trim());
         if (value === "") {
             OnRemoveTechnologyItem(technologyIndex);
             return;
@@ -53,12 +56,6 @@ const TechnologyEditor = ({index}) => {
         });
     };
 
-
-
-
-
-
-
     return (
         <MinimizedCard
             haveAddButton={true}
@@ -69,7 +66,6 @@ const TechnologyEditor = ({index}) => {
             canHaveOnBackMinimize={false}
             canEditTitle={false}
             OnClickAddButton={OnAddTechnologyItem}>
-
 
             <DroppableUtil droppableId={`${draggableId}-${index}`} type={type}>
                 {
@@ -88,6 +84,5 @@ const TechnologyEditor = ({index}) => {
             </DroppableUtil>
         </MinimizedCard>
     )
-
 };
 export default TechnologyEditor;

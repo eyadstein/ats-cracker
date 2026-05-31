@@ -5,6 +5,11 @@ import DroppableUtil from "@/components/cv-builder/utils/droppable-utils";
 import GeneralListItem from "@/components/cv-builder/control-components/items/general-list-item";
 import MinimizedCard from "@/components/general/minimized-card";
 
+function stripHtml(html) {
+    if (!html) return "";
+    return html.replace(/<[^>]*>/g, '');
+}
+
 const NotesEditor = ({
                          index,
                          type,
@@ -20,7 +25,7 @@ const NotesEditor = ({
     const notes = resumeData?.data?.[section]?.[index]?.[subSection] || [];
 
     const OnEditNoteItem = (e, noteIndex) => {
-        const value = e.target.innerText.trim();
+        const value = stripHtml(e.target.innerText.trim());
         if (value === "") {
             OnRemoveNoteItem(noteIndex);
             return;
@@ -100,10 +105,8 @@ const NotesEditor = ({
             IsCardExpanded={IsCardExpanded}
             OnClickAddButton={OnAddNoteItem}>
 
-
             < DroppableUtil
-                droppableId={`${draggableId}-${index}`
-                }
+                droppableId={`${draggableId}-${index}`}
                 type={type}>
                 {
                     notes.map((note, subIndex) => {
@@ -123,6 +126,5 @@ const NotesEditor = ({
             </DroppableUtil>
         </MinimizedCard>
     )
-
 };
 export default NotesEditor;
