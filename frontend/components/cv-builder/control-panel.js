@@ -163,7 +163,7 @@ export default function ControlPanel({id}) {
     const [isLoaded, setIsLoaded] = useState(true);
     const [animKey, setAnimKey] = useState(0);
     const {Draggable} = useDndContext();
-    const completion = getSectionCompletion();
+    const completion = resumeData?.data ? getSectionCompletion() : {};
 
     useEffect(() => {
         if (id === 'cvnew' && !resumeData?.data?.name) {
@@ -307,3 +307,4 @@ export default function ControlPanel({id}) {
         </div>
     );
 }
+

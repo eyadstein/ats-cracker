@@ -24,8 +24,8 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
-/* Dark pages override */
-.dark-page {
-  background: linear-gradient(135deg, #0f0c29 0%, #1a1040 40%, #0d1b4b 100%);
-  color: white;
+body.dark-page {
+  background: linear-gradient(135deg, #0f0c29 0%, #1a1040 40%, #0d1b4b 100%) !important;
+  color: white !important;
+  min-height: 100vh;
 }

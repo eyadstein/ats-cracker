@@ -12,7 +12,7 @@ export default function RootLayout({ children }) {
     return (
         <html lang="en">
         <body className="dark-page">
-        <div className={`${geistSans.variable} ${geistMono.variable} antialiased relative flex min-h-screen w-full flex-col items-center`}>
+        <div className={`${geistSans.variable} ${geistMono.variable} relative flex min-h-screen w-full flex-col items-center`}>
             <AppProvider>
                 <Header atsClass="text-white" />
                 {children}
