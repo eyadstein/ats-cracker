@@ -1,9 +1,14 @@
 "use client";
 import CircularButton from "@/components/general/circle-btn";
-import {FaDownload, FaCopy, FaUpload, FaPaste, FaSyncAlt, FaFileWord, FaFilePdf} from "react-icons/fa";
+import { FaDownload, FaCopy, FaUpload, FaPaste, FaSyncAlt, FaFileWord, FaFilePdf } from "react-icons/fa";
 import useAppContext from "@/hooks/useAppContext";
-import {DownloadIcon} from "@/components/svgs/svgs";
+import { DownloadIcon } from "@/components/svgs/svgs";
 import { useState } from "react";
+
+function stripHtml(html) {
+    if (!html) return "";
+    return html.replace(/<[^>]*>/g, '');
+}
 
 function parsePlainTextToCV(rawText) {
     const lines = rawText.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
@@ -13,8 +18,8 @@ function parsePlainTextToCV(rawText) {
         name: "", position: "", contactInformation: "", email: "", address: "",
         socialMedia: [], summary: [], educations: [], courses: [],
         workExperience: [], projects: [], skills: [], languages: [],
-        titles: { profile:"PROFILE", experience:"EXPERIENCE", education:"EDUCATION", certification:"CERTIFICATION", skills:"SKILLS", languages:"LANGUAGES", projects:"PROJECTS" },
-        order: ["contactInformation","profile","workExperience","education","courses","skills","languages","projects"]
+        titles: { profile: "PROFILE", experience: "EXPERIENCE", education: "EDUCATION", certification: "CERTIFICATION", skills: "SKILLS", languages: "LANGUAGES", projects: "PROJECTS" },
+        order: ["contactInformation", "profile", "workExperience", "education", "courses", "skills", "languages", "projects"]
     };
 
     const emailMatch = full.match(/[\w.+-]+@[\w.-]+\.\w{2,}/);
@@ -42,14 +47,16 @@ function parsePlainTextToCV(rawText) {
 
     for (let i = 0; i < Math.min(4, lines.length); i++) {
         if (!lines[i].match(/[@\d{6,}|http|www]/i) && lines[i].length < 60) {
-            cv.name = lines[i]; break;
+            cv.name = stripHtml(lines[i]);
+            break;
         }
     }
 
     for (let i = 1; i < Math.min(6, lines.length); i++) {
         const l = lines[i];
         if (l !== cv.name && !l.match(/[@\+\d{5,}]/) && l.length < 80 && !isSectionHeader(l)) {
-            cv.position = l; break;
+            cv.position = stripHtml(l);
+            break;
         }
     }
 
@@ -59,14 +66,14 @@ function parsePlainTextToCV(rawText) {
     const flushBuffer = () => {
         if (!buffer.length) return;
         if (currentSection === "summary") {
-            cv.summary = [{ description: buffer.join(" ") }];
+            cv.summary = [{ description: stripHtml(buffer.join(" ")) }];
         } else if (currentSection === "skills") {
-            const allSkills = buffer.join(", ").split(/[,|•·\n\/]/).map(s => s.trim()).filter(s => s.length > 1 && s.length < 50);
+            const allSkills = buffer.join(", ").split(/[,|•·\n\/]/).map(s => stripHtml(s.trim())).filter(s => s.length > 1 && s.length < 50);
             cv.skills = allSkills.map(s => ({ name: s, level: 3 }));
         } else if (currentSection === "experience") {
             let i = 0;
             while (i < buffer.length) {
-                const title = buffer[i] || "";
+                const title = stripHtml(buffer[i] || "");
                 let company = "", startDate = "", endDate = "", descLines = [];
                 let j = i + 1;
                 while (j < buffer.length && !isShortHeader(buffer[j])) {
@@ -74,9 +81,9 @@ function parsePlainTextToCV(rawText) {
                         const parts = buffer[j].split(/[-–—to]/i).map(s => s.trim());
                         startDate = parts[0] || ""; endDate = parts[1] || "Present";
                     } else if (!company && buffer[j].length < 80 && !buffer[j].startsWith("•")) {
-                        company = buffer[j];
+                        company = stripHtml(buffer[j]);
                     } else {
-                        descLines.push(buffer[j].replace(/^•\s*/, ""));
+                        descLines.push(stripHtml(buffer[j].replace(/^•\s*/, "")));
                     }
                     j++;
                 }
@@ -87,14 +94,14 @@ function parsePlainTextToCV(rawText) {
         } else if (currentSection === "education") {
             let i = 0;
             while (i < buffer.length) {
-                const degree = buffer[i] || "";
+                const degree = stripHtml(buffer[i] || "");
                 let school = "", startDate = "", endDate = "";
                 let j = i + 1;
                 while (j < buffer.length && !isShortHeader(buffer[j])) {
                     if (isDateRange(buffer[j])) {
                         const parts = buffer[j].split(/[-–—to]/i).map(s => s.trim());
                         startDate = parts[0] || ""; endDate = parts[1] || "Present";
-                    } else if (!school) { school = buffer[j]; }
+                    } else if (!school) { school = stripHtml(buffer[j]); }
                     j++;
                 }
                 cv.educations.push({ degree, school, startDate, endDate });
@@ -104,12 +111,12 @@ function parsePlainTextToCV(rawText) {
         } else if (currentSection === "projects") {
             let i = 0;
             while (i < buffer.length) {
-                const name = buffer[i] || "";
+                const name = stripHtml(buffer[i] || "");
                 let descLines = [], url = "";
                 let j = i + 1;
                 while (j < buffer.length && !isShortHeader(buffer[j])) {
                     if (buffer[j].match(/https?:\/\//)) url = buffer[j];
-                    else descLines.push(buffer[j].replace(/^•\s*/, ""));
+                    else descLines.push(stripHtml(buffer[j].replace(/^•\s*/, "")));
                     j++;
                 }
                 cv.projects.push({ name, description: descLines.join("\n"), url });
@@ -117,14 +124,14 @@ function parsePlainTextToCV(rawText) {
                 if (i === j && i < buffer.length) i++;
             }
         } else if (currentSection === "languages") {
-            cv.languages = buffer.flatMap(b => b.split(/[,|•·]/).map(s => s.trim()).filter(Boolean))
+            cv.languages = buffer.flatMap(b => b.split(/[,|•·]/).map(s => stripHtml(s.trim())).filter(Boolean))
                 .map(l => {
                     const parts = l.split(/[()[\]]/);
-                    return { name: parts[0].trim(), level: parts[1]?.trim() || "Intermediate" };
+                    return { name: stripHtml(parts[0].trim()), level: stripHtml(parts[1]?.trim() || "Intermediate") };
                 });
         } else if (currentSection === "courses") {
-            cv.courses = buffer.flatMap(b => b.split(/[,|•·\n]/).map(s => s.trim()).filter(Boolean))
-                .map(name => ({ name, date: "" }));
+            cv.courses = buffer.flatMap(b => b.split(/[,|•·\n]/).map(s => stripHtml(s.trim())).filter(Boolean))
+                .map(name => ({ name: stripHtml(name), date: "" }));
         }
         buffer = [];
     };
@@ -147,10 +154,21 @@ function parsePlainTextToCV(rawText) {
 }
 
 export default function RightSidebar() {
-    const {resumeData, setResumeData, syncResumeData} = useAppContext();
+    const { resumeData, setResumeData, syncResumeData } = useAppContext();
     const [loading, setLoading] = useState(false);
 
     const safeSetResume = async (newData) => {
+        const sanitizeKeys = (obj) => {
+            if (obj === null || typeof obj !== 'object') return obj;
+            if (Array.isArray(obj)) return obj.map(sanitizeKeys);
+            const sanitized = {};
+            for (const key of Object.keys(obj)) {
+                if (key === '__proto__' || key === 'constructor' || key === 'prototype') continue;
+                sanitized[key] = sanitizeKeys(obj[key]);
+            }
+            return sanitized;
+        };
+
         const safe = {
             name: newData.name || "", position: newData.position || "",
             email: newData.email || "", contactInformation: newData.contactInformation || "",
@@ -159,10 +177,11 @@ export default function RightSidebar() {
             courses: newData.courses || [], workExperience: newData.workExperience || [],
             projects: newData.projects || [], skills: newData.skills || [],
             languages: newData.languages || [],
-            titles: newData.titles || { profile:"PROFILE", experience:"EXPERIENCE", education:"EDUCATION", certification:"CERTIFICATION", skills:"SKILLS", languages:"LANGUAGES", projects:"PROJECTS" },
-            order: newData.order || ["contactInformation","profile","workExperience","education","courses","skills","languages","projects"],
+            titles: newData.titles || { profile: "PROFILE", experience: "EXPERIENCE", education: "EDUCATION", certification: "CERTIFICATION", skills: "SKILLS", languages: "LANGUAGES", projects: "PROJECTS" },
+            order: newData.order || ["contactInformation", "profile", "workExperience", "education", "courses", "skills", "languages", "projects"],
         };
-        const updated = { ...resumeData, data: safe };
+        const sanitized = sanitizeKeys(safe);
+        const updated = { ...resumeData, data: sanitized };
         setResumeData(updated);
         try {
             await syncResumeData(updated);
@@ -174,8 +193,8 @@ export default function RightSidebar() {
 
     const downloadAsJson = () => {
         const el = document.createElement("a");
-        el.href = URL.createObjectURL(new Blob([JSON.stringify(resumeData?.data || {})], {type: "application/json"}));
-        el.download = `resume-${resumeData?.title || "untitled"}.json`;
+        el.href = URL.createObjectURL(new Blob([JSON.stringify(resumeData?.data || {})], { type: "application/json" }));
+        el.download = `resume-${stripHtml(resumeData?.title || "untitled")}.json`;
         document.body.appendChild(el);
         el.click();
         document.body.removeChild(el);
@@ -189,24 +208,24 @@ export default function RightSidebar() {
             const children = [];
 
             const sectionHeader = (text) => new Paragraph({
-                children: [new TextRun({ text, bold: true, size: 24, color: "1a1040", font: "Calibri" })],
+                children: [new TextRun({ text: stripHtml(text), bold: true, size: 24, color: "1a1040", font: "Calibri" })],
                 border: { bottom: { color: "8b5cf6", style: BorderStyle.SINGLE, size: 12 } },
                 spacing: { before: 300, after: 120 },
             });
 
             const bulletPara = (text) => new Paragraph({
-                children: [new TextRun({ text: `• ${text}`, size: 20, font: "Calibri" })],
+                children: [new TextRun({ text: `• ${stripHtml(text)}`, size: 20, font: "Calibri" })],
                 spacing: { after: 80, before: 40 },
                 indent: { left: 360 },
             });
 
             children.push(new Paragraph({
-                children: [new TextRun({ text: d.name || "", bold: true, size: 48, color: "1a1040", font: "Calibri" })],
+                children: [new TextRun({ text: stripHtml(d.name) || "", bold: true, size: 48, color: "1a1040", font: "Calibri" })],
                 alignment: AlignmentType.CENTER,
                 spacing: { after: 80 },
             }));
             if (d.position) children.push(new Paragraph({
-                children: [new TextRun({ text: d.position, size: 24, color: "6366f1", font: "Calibri" })],
+                children: [new TextRun({ text: stripHtml(d.position), size: 24, color: "6366f1", font: "Calibri" })],
                 alignment: AlignmentType.CENTER,
                 spacing: { after: 120 },
             }));
@@ -228,7 +247,7 @@ export default function RightSidebar() {
             if (d.summary?.length) {
                 children.push(sectionHeader(d.titles?.profile || "PROFILE"));
                 d.summary.forEach(s => s.description && children.push(new Paragraph({
-                    children: [new TextRun({ text: s.description, size: 20, font: "Calibri" })],
+                    children: [new TextRun({ text: stripHtml(s.description), size: 20, font: "Calibri" })],
                     spacing: { after: 60 },
                 })));
             }
@@ -241,7 +260,7 @@ export default function RightSidebar() {
                         children: [
                             new TableCell({
                                 width: { size: 70, type: WidthType.PERCENT },
-                                children: [new Paragraph({ children: [new TextRun({ text: w.position || "", bold: true, size: 22, font: "Calibri" })] })],
+                                children: [new Paragraph({ children: [new TextRun({ text: stripHtml(w.position) || "", bold: true, size: 22, font: "Calibri" })] })],
                                 borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } },
                             }),
                             new TableCell({
@@ -258,7 +277,7 @@ export default function RightSidebar() {
                         children: [
                             new TableCell({
                                 columnSpan: 2,
-                                children: [new Paragraph({ children: [new TextRun({ text: w.company, size: 20, color: "444444", font: "Calibri" })] })],
+                                children: [new Paragraph({ children: [new TextRun({ text: stripHtml(w.company), size: 20, color: "444444", font: "Calibri" })] })],
                                 borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } },
                             }),
                         ],
@@ -279,7 +298,7 @@ export default function RightSidebar() {
                         children: [
                             new TableCell({
                                 width: { size: 70, type: WidthType.PERCENT },
-                                children: [new Paragraph({ children: [new TextRun({ text: e.degree || "", bold: true, size: 22, font: "Calibri" })] })],
+                                children: [new Paragraph({ children: [new TextRun({ text: stripHtml(e.degree) || "", bold: true, size: 22, font: "Calibri" })] })],
                                 borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } },
                             }),
                             new TableCell({
@@ -296,7 +315,7 @@ export default function RightSidebar() {
                         children: [
                             new TableCell({
                                 columnSpan: 2,
-                                children: [new Paragraph({ children: [new TextRun({ text: e.school, size: 20, color: "444444", font: "Calibri" })] })],
+                                children: [new Paragraph({ children: [new TextRun({ text: stripHtml(e.school), size: 20, color: "444444", font: "Calibri" })] })],
                                 borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } },
                             }),
                         ],
@@ -310,7 +329,7 @@ export default function RightSidebar() {
                 children.push(sectionHeader(d.titles?.projects || "PROJECTS"));
                 d.projects.forEach(p => {
                     if (p.name) children.push(new Paragraph({
-                        children: [new TextRun({ text: p.name, bold: true, size: 22, font: "Calibri" })],
+                        children: [new TextRun({ text: stripHtml(p.name), bold: true, size: 22, font: "Calibri" })],
                         spacing: { before: 120, after: 40 },
                     }));
                     if (p.description) {
@@ -338,7 +357,7 @@ export default function RightSidebar() {
                     children.push(new Table({
                         rows: [new TableRow({
                             children: chunk.map(s => new TableCell({
-                                children: [new Paragraph({ children: [new TextRun({ text: `• ${s}`, size: 20, font: "Calibri" })] })],
+                                children: [new Paragraph({ children: [new TextRun({ text: `• ${stripHtml(s)}`, size: 20, font: "Calibri" })] })],
                                 borders: { top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.NONE }, left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE } },
                             })),
                         })],
@@ -351,7 +370,7 @@ export default function RightSidebar() {
                 children.push(sectionHeader(d.titles?.languages || "LANGUAGES"));
                 children.push(new Paragraph({
                     children: [new TextRun({
-                        text: d.languages.map(l => `${l.name}${l.level ? ` (${l.level})` : ""}`).join("  •  "),
+                        text: d.languages.map(l => `${stripHtml(l.name)}${l.level ? ` (${stripHtml(l.level)})` : ""}`).join("  •  "),
                         size: 20, font: "Calibri"
                     })],
                 }));
@@ -364,7 +383,7 @@ export default function RightSidebar() {
             const blob = await Packer.toBlob(doc);
             const el = document.createElement("a");
             el.href = URL.createObjectURL(blob);
-            el.download = `${resumeData?.title || "resume"}.docx`;
+            el.download = `${stripHtml(resumeData?.title || "resume")}.docx`;
             document.body.appendChild(el);
             el.click();
             document.body.removeChild(el);
@@ -380,10 +399,9 @@ export default function RightSidebar() {
         const input = document.createElement("input");
         input.type = "file";
         input.accept = accept;
-        // CRITICAL FIX: append to DOM so browser doesn't block it
         input.style.display = "none";
         document.body.appendChild(input);
-        
+
         input.addEventListener("change", async (e) => {
             const file = e.target.files[0];
             if (!file) {
@@ -404,19 +422,9 @@ export default function RightSidebar() {
                     const parsed = parsePlainTextToCV(result.value);
                     await safeSetResume(parsed);
                 } else if (file.name.endsWith(".pdf")) {
-                    const arrayBuffer = await file.arrayBuffer();
-                    const pdfjsLib = await new Promise((resolve, reject) => {
-                        if (window.pdfjsLib) { resolve(window.pdfjsLib); return; }
-                        const script = document.createElement("script");
-                        script.src = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js";
-                        script.onload = () => {
-                            window.pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
-                            resolve(window.pdfjsLib);
-                        };
-                        script.onerror = reject;
-                        document.head.appendChild(script);
-                    });
-                    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+                    // SECURITY FIX: Use npm package instead of CDN
+                    const pdfjsLib = await import('pdfjs-dist/legacy/build/pdf.js');
+                    const pdf = await pdfjsLib.getDocument({ data: await file.arrayBuffer() }).promise;
                     let text = "";
                     for (let i = 1; i <= pdf.numPages; i++) {
                         const page = await pdf.getPage(i);
@@ -442,10 +450,9 @@ export default function RightSidebar() {
                 alert("Error reading file: " + err.message);
             }
             setLoading(false);
-            // Clean up
             if (input.parentNode) document.body.removeChild(input);
         }, { once: true });
-        
+
         input.click();
     };
 
@@ -476,15 +483,14 @@ export default function RightSidebar() {
                 </div>
             )}
 
-            <CircularButton tooltipText="Download JSON" onClick={downloadAsJson} icon={DownloadIcon} bgColor="bg-primaryBlack"/>
-            <CircularButton tooltipText="Download Word (.docx)" onClick={downloadAsWord} icon={FaFileWord} bgColor="bg-blue-600 hover:bg-blue-700"/>
-            <CircularButton tooltipText="Copy as JSON" onClick={copyAsJson} icon={FaCopy} bgColor="bg-teal-500 hover:bg-teal-600"/>
-            <CircularButton tooltipText="Upload JSON" onClick={() => triggerFileInput(".json")} icon={FaUpload} bgColor="bg-purple-600 hover:bg-purple-700"/>
-            <CircularButton tooltipText="Upload PDF" onClick={() => triggerFileInput(".pdf")} icon={FaFilePdf} bgColor="bg-red-600 hover:bg-red-700"/>
-            <CircularButton tooltipText="Upload Word (.docx)" onClick={() => triggerFileInput(".docx")} icon={FaFileWord} bgColor="bg-blue-500 hover:bg-blue-600"/>
-            <CircularButton tooltipText="Paste Text or JSON" onClick={handlePaste} icon={FaPaste} bgColor="bg-green-500 hover:bg-green-600"/>
-            <CircularButton tooltipText="Sync" onClick={() => syncResumeData(resumeData)} icon={FaSyncAlt} bgColor="bg-yellow-500 hover:bg-yellow-600"/>
+            <CircularButton tooltipText="Download JSON" onClick={downloadAsJson} icon={DownloadIcon} bgColor="bg-primaryBlack" />
+            <CircularButton tooltipText="Download Word (.docx)" onClick={downloadAsWord} icon={FaFileWord} bgColor="bg-blue-600 hover:bg-blue-700" />
+            <CircularButton tooltipText="Copy as JSON" onClick={copyAsJson} icon={FaCopy} bgColor="bg-teal-500 hover:bg-teal-600" />
+            <CircularButton tooltipText="Upload JSON" onClick={() => triggerFileInput(".json")} icon={FaUpload} bgColor="bg-purple-600 hover:bg-purple-700" />
+            <CircularButton tooltipText="Upload PDF" onClick={() => triggerFileInput(".pdf")} icon={FaFilePdf} bgColor="bg-red-600 hover:bg-red-700" />
+            <CircularButton tooltipText="Upload Word (.docx)" onClick={() => triggerFileInput(".docx")} icon={FaFileWord} bgColor="bg-blue-500 hover:bg-blue-600" />
+            <CircularButton tooltipText="Paste Text or JSON" onClick={handlePaste} icon={FaPaste} bgColor="bg-green-500 hover:bg-green-600" />
+            <CircularButton tooltipText="Sync" onClick={() => syncResumeData(resumeData)} icon={FaSyncAlt} bgColor="bg-yellow-500 hover:bg-yellow-600" />
         </div>
     );
 }
-

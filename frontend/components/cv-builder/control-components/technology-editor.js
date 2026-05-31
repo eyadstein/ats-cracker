@@ -8,7 +8,7 @@ const TechnologyEditor = ({index}) => {
     const draggableId = "experience-technology";
     const type = "TECHNOLOGY";
     const {setResumeData, resumeData} = useAppContext();
-    const technologies = resumeData.data.workExperience[index].technologies;
+    const technologies = resumeData?.data?.workExperience?.[index]?.technologies || [];
 
 
 

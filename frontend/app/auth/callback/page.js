@@ -13,16 +13,35 @@ function CallbackHandler() {
         const username = params.get("username");
         const email = params.get("email");
         const error = params.get("error");
+        const state = params.get("state");
 
-        if (error) { router.push("/?error=" + error); return; }
+        // Validate state parameter to prevent CSRF
+        const storedState = sessionStorage.getItem('oauth_state');
+        if (state && state !== storedState) {
+            router.push("/?error=invalid_state");
+            return;
+        }
+        sessionStorage.removeItem('oauth_state');
+
+        if (error) { 
+            router.push("/?error=" + encodeURIComponent(error)); 
+            return; 
+        }
 
         if (access && refresh) {
+            // Validate tokens are JWT format before setting
+            const jwtPattern = /^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/;
+            if (!jwtPattern.test(access) || !jwtPattern.test(refresh)) {
+                router.push("/?error=invalid_token_format");
+                return;
+            }
             setOAuthCookies({ access, refresh, username, email }).then(() => {
-                // Full reload forces AppProvider to re-read cookies
                 window.location.href = "/dashboard";
             });
+        } else {
+            router.push("/?error=missing_tokens");
         }
-    }, []);
+    }, [params, router]);
 
     return null;
 }

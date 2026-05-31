@@ -10,7 +10,7 @@ const CvLinkItem = ({title,onRemove,className, ...props}) => {
     const divRef = useRef(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const {resumeData, setResumeData, globalRefs} = useAppContext();
-    const data = resumeData.data.socialMedia.find((item) => item.socialMedia === title) || {};
+    const data = resumeData?.data?.socialMedia?.find((item) => item.socialMedia === title) || {};
 
 
     const [link, setLink] = useState(data.link || "");

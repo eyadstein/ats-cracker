@@ -1,10 +1,10 @@
 "use client";
-import React, {useEffect, useRef, useState, useCallback} from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import AppContext from './app-context';
-import {getEmailAndName} from "@/lib/utils";
-import {cvCreateUpdate, cvGetAction} from "@/actions/cvs";
+import { getEmailAndName } from "@/lib/utils";
+import { cvCreateUpdate, cvGetAction } from "@/actions/cvs";
 
-const AppProvider = ({children}) => {
+const AppProvider = ({ children }) => {
     const [resumeData, setResumeDataRaw] = useState(null);
     const [resumeList, setResumeList] = useState([]);
     const globalRefs = useRef({});
@@ -52,9 +52,21 @@ const AppProvider = ({children}) => {
                 profile: "PROFILE", experience: "EXPERIENCE", education: "EDUCATION",
                 certification: "CERTIFICATION", skills: "SKILLS", languages: "LANGUAGES", projects: "PROJECTS"
             },
-            order: ["contactInformation","profile","workExperience","education","courses","skills","languages","projects"],
+            order: ["contactInformation", "profile", "workExperience", "education", "courses", "skills", "languages", "projects"],
             customSections: [],
         }
+    };
+
+    // SECURITY FIX: Prevent prototype pollution
+    const sanitizeKeys = (obj) => {
+        if (obj === null || typeof obj !== 'object') return obj;
+        if (Array.isArray(obj)) return obj.map(sanitizeKeys);
+        const sanitized = {};
+        for (const key of Object.keys(obj)) {
+            if (key === '__proto__' || key === 'constructor' || key === 'prototype') continue;
+            sanitized[key] = sanitizeKeys(obj[key]);
+        }
+        return sanitized;
     };
 
     const safeSetResumeData = useCallback((newData) => {
@@ -74,7 +86,7 @@ const AppProvider = ({children}) => {
                 languages: newData?.data?.languages || [],
                 customSections: newData?.data?.customSections || [],
                 order: (newData?.data?.order || defaultCv.data.order).filter(k => {
-                    const known = ["contactInformation","profile","workExperience","education","courses","skills","languages","projects"];
+                    const known = ["contactInformation", "profile", "workExperience", "education", "courses", "skills", "languages", "projects"];
                     const customKeys = (newData?.data?.customSections || []).map(s => s.key);
                     return known.includes(k) || customKeys.includes(k);
                 }),
@@ -84,8 +96,10 @@ const AppProvider = ({children}) => {
                 },
             }
         };
-        setResumeDataRaw(merged);
-        return merged;
+        // Sanitize to prevent prototype pollution
+        const sanitized = sanitizeKeys(merged);
+        setResumeDataRaw(sanitized);
+        return sanitized;
     }, []);
 
     const getResumeWithId = async (id) => {
@@ -136,7 +150,6 @@ const AppProvider = ({children}) => {
             languages: d.languages?.length > 0,
             projects: d.projects?.length > 0,
         };
-        // Add custom sections
         (d.customSections || []).forEach(s => {
             base[s.key] = s.items?.length > 0 && s.items.some(i => i.description?.trim());
         });

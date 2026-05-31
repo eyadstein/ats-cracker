@@ -11,7 +11,7 @@ function LinkModal({link,setLink, divRef, isModalOpen, setIsModalOpen }) {
     };
 
     const handleAddLink = () => {
-        setLink(inputRef.current.value);
+        setLink(localLink);
         setIsModalOpen(false);
 
     }

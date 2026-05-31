@@ -3,29 +3,29 @@ import DroppableDraggableList from "@/components/cv-builder/utils/droppable-drag
 import DateComponent from "@/components/general/date-component";
 import DraggableUtil from "@/components/cv-builder/utils/draggable-util";
 
+function stripHtml(html) {
+    if (!html) return "";
+    return html.replace(/<[^>]*>/g, '');
+}
 
-
-const AchievementItem = ({ item,onBlur,globalRefs,itemIndex,subIndex }) => (
-            <div
-                onFocus={(e) => {
-                    if (!globalRefs.current[`${itemIndex}-achievement-${subIndex}`])
-                        return;
-
-                    globalRefs.current[`${itemIndex}-achievement-${subIndex}`].scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'center',
-                    });
-                }}
-                onBlur={onBlur}
-                dangerouslySetInnerHTML={{__html: item.text}}
-                contentEditable
-            />
+const AchievementItem = ({ item, onBlur, globalRefs, itemIndex, subIndex }) => (
+    <div
+        onFocus={(e) => {
+            if (!globalRefs.current[`${itemIndex}-achievement-${subIndex}`])
+                return;
+            globalRefs.current[`${itemIndex}-achievement-${subIndex}`].scrollIntoView({
+                behavior: 'smooth',
+                block: 'center',
+            });
+        }}
+        onBlur={onBlur}
+    >
+        {stripHtml(item.text)}
+    </div>
 );
 const DraggableAchievementList = DroppableDraggableList(AchievementItem);
 
-
-
-const WorkExperienceItemBody = ({item})=> {
+const WorkExperienceItemBody = ({ item }) => {
     return <>
         <div className="flex flex-row justify-between space-y-1">
             <p className="content i-bold ">{item.position} {item.isPartTime ? "(Part-Time)" : ""}</p>
@@ -48,8 +48,8 @@ const WorkExperienceItemBody = ({item})=> {
                         wordWrap: 'break-word',
                         display: 'inline-flex',
                         fontSize: '.9rem',
-                        padding: '2px 0', // Adjust padding to make height smaller
-                        lineHeight: '1.2', // Adjust line-height to make height smaller
+                        padding: '2px 0',
+                        lineHeight: '1.2',
                     }}
                 >
                     {item.company && <span>{item.company}</span>}
@@ -65,9 +65,7 @@ const WorkExperienceItemBody = ({item})=> {
         </p>
 
         {item.companyField &&
-            <p className="content i-bold pl-2" contentEditable
-               dangerouslySetInnerHTML={{__html: item.companyField}}
-            ></p>
+            <p className="content i-bold pl-1">{stripHtml(item.companyField)}</p>
         }
 
         {item.technologies && item.technologies.length > 0 &&
@@ -80,15 +78,15 @@ const WorkExperienceItemBody = ({item})=> {
     </>
 }
 
-
 const WorkExperienceItem = ({
-                                draggableId, index, item, type, keyData, isDraggable
-                            }) => {
-    const {updateResumeData, globalRefs} = useAppContext()
+    draggableId, index, item, type, keyData, isDraggable
+}) => {
+    const { updateResumeData, globalRefs } = useAppContext()
     const handleAchievementChange = (index, achievementIndex, value) => {
+        const sanitized = stripHtml(value);
         updateResumeData((prevData) => {
             const newWorkExperience = [...prevData.data.workExperience];
-            newWorkExperience[index].achievements[achievementIndex].text = value;
+            newWorkExperience[index].achievements[achievementIndex].text = sanitized;
             return {
                 ...prevData,
                 data: {
@@ -96,46 +94,28 @@ const WorkExperienceItem = ({
                     workExperience: newWorkExperience
                 }
             }
-
-
         });
     }
-    if(!isDraggable){
+    if (!isDraggable) {
         return <>
-            <WorkExperienceItemBody itemIndex={index} item={item} globalRefs={globalRefs}
-                                    OnBlurEvent={(e, achievementIndex) =>
-                                        handleAchievementChange(index, achievementIndex, e.target.innerText)
+            <WorkExperienceItemBody item={item} />
 
-                                    }/>
-
-                <ul className="list-disc ul-padding content">
-                    {
-                        item.achievements.map((achievement, index) => {
-                            return <li key={index} >
-                                <AchievementItem item={achievement} onBlur={(e, achievementIndex) =>
-                                    handleAchievementChange(index, achievementIndex, e.target.innerText)
-                                } globalRefs={globalRefs} itemIndex={index} subIndex={index}/>
-                            </li>
-                        })
-                    }
-                </ul>
-
-
-
+            <ul className="list-disc ul-padding content">
+                {
+                    item.achievements.map((achievement, idx) => {
+                        return <li key={`ach-${idx}`} >
+                            <AchievementItem item={achievement} onBlur={(e, achievementIndex) =>
+                                handleAchievementChange(index, achievementIndex, e.target.innerText)
+                            } globalRefs={globalRefs} itemIndex={index} subIndex={idx} />
+                        </li>
+                    })
+                }
+            </ul>
         </>
-
-
-
-
     }
 
-
     return <DraggableUtil draggableId={draggableId} index={index} keyData={keyData}>
-
-        <WorkExperienceItemBody
-            OnBlurEvent={(e, achievementIndex) =>
-                handleAchievementChange(index, achievementIndex, e.target.innerText)}
-            item={item}/>
+        <WorkExperienceItemBody item={item} />
 
         <DraggableAchievementList
             itemIndex={index}

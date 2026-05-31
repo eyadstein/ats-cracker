@@ -11,7 +11,7 @@ const CvLinkComponent = ({ className,...props }) => {
             {"title": "GooglePlay", "url": "", "render": false},
             {"title": "AppStore", "url": "", "render": false},
         ]
-        resumeData.data.socialMedia.forEach((item)=>{
+        resumeData?.data?.socialMedia?.forEach((item)=>{
             const index = data.findIndex((x)=>x.title === item.socialMedia);
             if(index !== -1){
                 data[index].render = true;

@@ -8,6 +8,7 @@ String.prototype.capitalize = function () {
 }
 
 function formatDateRange(startYear, endYear) {
+    if (!startYear || startYear === "") return "";
     try {
         const start = new Date(startYear);
         const end = new Date(endYear);

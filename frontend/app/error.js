@@ -4,11 +4,13 @@ import Link from "next/link";
 
 export default function ErrorPage({ error, reset }) {
     useEffect(() => {
+        // Log full error internally only
         if (error) console.error("App error:", error);
     }, [error]);
 
-    const statusCode = error?.digest || error?.statusCode || "";
-    const message = error?.message || "Something went wrong";
+    // Don't expose internal error details to users
+    const statusCode = error?.digest || "";
+    const message = "Something went wrong";
 
     return (
         <div className="fixed inset-0 flex items-center justify-center px-6"

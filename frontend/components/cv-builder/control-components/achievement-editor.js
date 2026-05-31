@@ -9,7 +9,7 @@ const AchievementEditor = ({index}) => {
     const draggableId = "experience-achievement";
     const type = "ACHIEVEMENT";
     const {setResumeData, resumeData} = useAppContext();
-    const achievements = resumeData.data.workExperience[index].achievements;
+    const achievements = resumeData?.data?.workExperience?.[index]?.achievements || [];
 
 
     const OnEditAchievementItem = (e, achievementIndex) => {

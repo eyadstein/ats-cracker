@@ -3,39 +3,40 @@ import useAppContext from "@/hooks/useAppContext";
 import DraggableUtil from "@/components/cv-builder/utils/draggable-util";
 import DateComponent from "@/components/general/date-component";
 
+function stripHtml(html) {
+    if (!html) return "";
+    return html.replace(/<[^>]*>/g, '');
+}
 
-const NotesItem = ({item, onBlur}) => (
-    <div
-        onBlur={onBlur}
-        dangerouslySetInnerHTML={{__html: item.text}}
-        contentEditable
-    />
+const NotesItem = ({ item, onBlur }) => (
+    <div onBlur={onBlur}>
+        {stripHtml(item.text)}
+    </div>
 );
 const DraggableNotesList = DroppableDraggableList(NotesItem);
-
 
 function CourseItemNotesList(item) {
     return <ul className="list-disc ul-padding content">
         {item.notes.map((note, index) => (
-            <li key={index}>
-                <NotesItem item={note}/>
+            <li key={`note-${index}`}>
+                <NotesItem item={note} />
             </li>
         ))}
-
     </ul>
 }
 
 function CourseItemBody(item, isDroppable, type, index, handleNoteChanged) {
+    const safeLink = item.link ? item.link.replace(/[<>\"']/g, '') : '#';
     return <>
         <div className="flex flex-row justify-between space-y-1">
             <p className="content i-bold">
                 <a
-                    href={`${item.link}`}
+                    href={safeLink}
                     aria-label={item.name}
                     title={item.name}
                     target="_blank"
                     rel="noreferrer"
-                    className="flex items-center gap-1 content justify-center  i-bold  underline text-blue-500 hover:text-blue-700"
+                    className="flex items-center gap-1 content justify-center i-bold underline text-blue-500 hover:text-blue-700"
                     style={{
                         wordWrap: 'break-word',
                         display: 'inline-flex',
@@ -44,10 +45,7 @@ function CourseItemBody(item, isDroppable, type, index, handleNoteChanged) {
                 >
                     <span>{item.name}</span>
                 </a>
-
             </p>
-
-
             <DateComponent
                 startYear={item.startYear}
                 endYear={item.endYear}
@@ -56,7 +54,6 @@ function CourseItemBody(item, isDroppable, type, index, handleNoteChanged) {
         </div>
         <p className="content i-bold pl-1">{item.school}</p>
 
-
         {isDroppable ?
             <DraggableNotesList
                 isDroppable={isDroppable}
@@ -64,22 +61,19 @@ function CourseItemBody(item, isDroppable, type, index, handleNoteChanged) {
                 type={`${type}_KEY_COURSES_NOTES`}
                 droppableId={`${type}_KEY_COURSES_NOTES-${index}`}
                 OnBlurEvent={(e, noteIndex) =>
-                    handleNoteChanged(index, noteIndex, e.target.innerText)
+                    handleNoteChanged(index, noteIndex, stripHtml(e.target.innerText))
                 }
             /> :
             CourseItemNotesList(item)
-
-
         }
-
     </>;
 }
 
-
-const CourseItem = ({draggableId, isDroppable, index, item, type, keyData}) => {
-    const {updateResumeData} = useAppContext();
+const CourseItem = ({ draggableId, isDroppable, index, item, type, keyData }) => {
+    const { updateResumeData } = useAppContext();
 
     const handleNoteChanged = (index, noteIndex, value) => {
+        const sanitized = stripHtml(value);
         updateResumeData((prevData) => ({
             ...prevData,
             data: {
@@ -88,7 +82,7 @@ const CourseItem = ({draggableId, isDroppable, index, item, type, keyData}) => {
                     i === index ? {
                         ...item,
                         notes: item.notes.map((ach, j) =>
-                            j === noteIndex ? { ...ach, text: value } : ach
+                            j === noteIndex ? { ...ach, text: sanitized } : ach
                         )
                     } : item
                 )
