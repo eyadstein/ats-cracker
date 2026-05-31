@@ -72,7 +72,7 @@ function TypingText() {
   }, [displayed, deleting, index]);
 
   return (
-    <span className="bg-gradient-to-r from-violet-400 via-indigo-400 to-violet-300 bg-clip-text text-transparent">
+    <span style={{ color: "#a78bfa", textShadow: "0 0 30px rgba(167,139,250,0.5)" }}>
       {displayed}
       <span className="animate-pulse text-violet-400">|</span>
     </span>
@@ -283,7 +283,7 @@ export default function HomePage() {
               <span className="inline-block bg-violet-500/10 border border-violet-500/30 rounded-full px-4 py-1.5 text-violet-300 text-sm font-medium mb-4">How It Works</span>
               <h2 className="text-4xl sm:text-5xl font-extrabold text-white mb-4">
                 Three steps to your{" "}
-                <span className="bg-gradient-to-r from-violet-400 to-indigo-400 bg-clip-text text-transparent">dream job</span>
+                <span style={{ color: "#a78bfa" }}>dream job</span>
               </h2>
             </div>
           </ScrollReveal>
@@ -320,7 +320,7 @@ export default function HomePage() {
             <div className="text-center mb-16">
               <h2 className="text-4xl sm:text-5xl font-extrabold text-white mb-4">
                 Everything you need to{" "}
-                <span className="bg-gradient-to-r from-violet-400 to-indigo-400 bg-clip-text text-transparent">get hired</span>
+                <span style={{ color: "#a78bfa" }}>get hired</span>
               </h2>
               <p className="text-gray-400 text-lg max-w-2xl mx-auto">
                 ATS Cracker gives you every tool to build, optimize, and export a resume that beats automated screening.

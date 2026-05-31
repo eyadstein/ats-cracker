@@ -14,7 +14,7 @@ const WorkExperienceItemEditor = ({}) => {
     const {resumeData, setResumeData, setControlPanelIndex,currentEditIndex,syncResumeData} = useAppContext();
     const [originalWorkExperience, setOriginalWorkExperience] = useState({});
     const index = currentEditIndex.index;
-    const workExperience = resumeData.data.workExperience[index];
+    const workExperience = resumeData?.data?.workExperience?.[index] || { position: "", company: "", startDate: "", endDate: "", description: "" };
 
 
 

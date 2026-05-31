@@ -10,7 +10,7 @@ const LanguageItemEditor = ({}) => {
     const {resumeData, setResumeData, setControlPanelIndex,currentEditIndex,syncResumeData} = useAppContext();
     const [originalLanguage, setOriginalLanguage] = useState({});
     const index = currentEditIndex.index;
-    const language = resumeData.data.languages[index];
+    const language = resumeData?.data?.languages?.[index] || { name: "", level: "" };
     const mode = currentEditIndex.mode;
 
 

@@ -11,7 +11,7 @@ const EducationItemEditor = ({}) => {
     const {resumeData, setResumeData, setControlPanelIndex,currentEditIndex,syncResumeData} = useAppContext();
     const [originalEducation, setOriginalEducation] = useState({});
     const index = currentEditIndex.index;
-    const education = resumeData.data.educations[index];
+    const education = resumeData?.data?.educations?.[index] || { degree: "", school: "", startDate: "", endDate: "" };
     const mode = currentEditIndex.mode;
 
 

@@ -48,7 +48,7 @@ const SocialMediaIconLink = ({socialMedia,index,isLast}) => {
 
         >
             {icons.map((icon, index) => {
-                if (icon.name === socialMedia.socialMedia.toLowerCase()) {
+                if (icon.name === (socialMedia?.socialMedia || "").toLowerCase()) {
                     return <span key={index}>{icon.icon}</span>;
                 }
             })}

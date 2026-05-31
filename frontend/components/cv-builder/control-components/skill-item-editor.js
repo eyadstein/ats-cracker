@@ -12,7 +12,7 @@ const SkillItemEditor = ({}) => {
     const {resumeData, setResumeData, setControlPanelIndex,currentEditIndex,syncResumeData} = useAppContext();
     const [originalSkill, setOriginalSkill] = useState({});
     const index = currentEditIndex.index;
-    const skill = resumeData.data.skills[index];
+    const skill = resumeData?.data?.skills?.[index] || { name: "", level: 3 };
     const mode = currentEditIndex.mode;
 
 

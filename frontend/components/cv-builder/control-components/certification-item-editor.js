@@ -11,7 +11,7 @@ const CertificationItemEditor = ({}) => {
     const {resumeData, setResumeData, setControlPanelIndex,currentEditIndex,syncResumeData} = useAppContext();
     const [originalCertification, setOriginalCertification] = useState({});
     const index = currentEditIndex.index;
-    const certification = resumeData.data.courses[index];
+    const certification = resumeData?.data?.courses?.[index] || { name: "", date: "" };
     const mode = currentEditIndex.mode;
 
 
