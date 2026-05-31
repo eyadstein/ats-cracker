@@ -35,7 +35,7 @@ function ProjectsEditor() {
             }
         };
         setResumeData(newData);
-        syncResumeData(newData);
+        syncResumeData(newData).catch(e => console.error("Save error:", e));
     };
     
     const removeProject = (idx) => {
@@ -43,7 +43,7 @@ function ProjectsEditor() {
         newProjects.splice(idx, 1);
         const newData = { ...resumeData, data: { ...resumeData.data, projects: newProjects } };
         setResumeData(newData);
-        syncResumeData(newData);
+        syncResumeData(newData).catch(e => console.error("Save error:", e));
     };
     
     const updateProject = (idx, field, value) => {
@@ -51,7 +51,7 @@ function ProjectsEditor() {
         newProjects[idx] = { ...newProjects[idx], [field]: value };
         const newData = { ...resumeData, data: { ...resumeData.data, projects: newProjects } };
         setResumeData(newData);
-        syncResumeData(newData);
+        syncResumeData(newData).catch(e => console.error("Save error:", e));
     };
 
     return (
@@ -108,7 +108,7 @@ function CustomSectionEditor({ sectionKey, title }) {
         );
         const newData = { ...resumeData, data: { ...resumeData.data, customSections: newSections } };
         setResumeData(newData);
-        syncResumeData(newData);
+        syncResumeData(newData).catch(e => console.error("Save error:", e));
     };
 
     const updateItem = (idx, value) => {
@@ -117,7 +117,7 @@ function CustomSectionEditor({ sectionKey, title }) {
         );
         const newData = { ...resumeData, data: { ...resumeData.data, customSections: newSections } };
         setResumeData(newData);
-        syncResumeData(newData);
+        syncResumeData(newData).catch(e => console.error("Save error:", e));
     };
 
     const removeItem = (idx) => {
@@ -126,7 +126,7 @@ function CustomSectionEditor({ sectionKey, title }) {
         );
         const newData = { ...resumeData, data: { ...resumeData.data, customSections: newSections } };
         setResumeData(newData);
-        syncResumeData(newData);
+        syncResumeData(newData).catch(e => console.error("Save error:", e));
     };
 
     return (
@@ -215,7 +215,7 @@ export default function ControlPanel({id}) {
         const newOrder = [...(currentData.order || []), key];
         const newData = { ...resumeData, data: { ...currentData, customSections: newCustomSections, order: newOrder } };
         setResumeData(newData);
-        syncResumeData(newData);
+        syncResumeData(newData).catch(e => console.error("Save error:", e));
     };
 
     const renderEditors = () => {
@@ -307,4 +307,3 @@ export default function ControlPanel({id}) {
         </div>
     );
 }
-
