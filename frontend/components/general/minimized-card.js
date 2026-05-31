@@ -72,11 +72,11 @@ const MinimizedCard = ({
                 {/* Title   */}
                 <div className={"w-10/12"}>
                     {
-                        !isExpanded ? <p className="truncate text-xl font-bold">{titleState.capitalize()}</p> :
+                        !isExpanded ? <p className="truncate text-xl font-bold">{(titleState || "").capitalize()}</p> :
                             <div className={"flex space-x-3"}>
                                 <div
                                     className={"border-inputBorder bg-inputBackground group flex h-12 max-w-[320px] grow items-center rounded-lg border border-solid pr-2"}>
-                                    <input type="text" placeholder={titleState.capitalize()}
+                                    <input type="text" placeholder={(titleState || "").capitalize()}
                                            ref={inputRef}
                                            onChange={canEditTitle?OnChangeTitle:null}
                                            className="h-12 w-full appearance-none rounded-lg text-base leading-normal shadow-none outline-none md:text-[17px] font-sans m-0 placeholder-inputPlaceholder bg-inputBackground border border-solid border-inputBorder text-inputText p-2.5 js-resumeContentSectionNameForm"
