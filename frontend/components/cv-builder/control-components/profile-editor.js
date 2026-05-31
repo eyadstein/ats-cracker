@@ -83,7 +83,7 @@ const ProfileEditor = () => {
         {/*Main Content*/}
 
         <DroppableUtil type={type} droppableId={draggableId}>
-            {item.data.summary.map((summary, index) => {
+            {(item?.data?.summary || []).map((summary, index) => {
                 return <ProfileSummaryItem draggableId={`${type}-${index}`} keyData={`${type}-${index}`}
                                            key={`${type}-${index}`}
                                            OnDisableItem={OnDisableItem}

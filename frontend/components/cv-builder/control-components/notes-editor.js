@@ -17,7 +17,7 @@ const NotesEditor = ({
                          IsCardExpanded = false
                      }) => {
     const {setResumeData, resumeData} = useAppContext();
-    const notes = resumeData.data[section][index][subSection];
+    const notes = resumeData?.data?.[section]?.[index]?.[subSection] || [];
 
     const OnEditNoteItem = (e, noteIndex) => {
         const value = e.target.innerText.trim();
@@ -25,52 +25,64 @@ const NotesEditor = ({
             OnRemoveNoteItem(noteIndex);
             return;
         }
-        const newNotes = [...resumeData.data[section]];
-        newNotes[index][subSection][noteIndex].text = value;
+        const sectionData = resumeData?.data?.[section] || [];
+        const newNotes = [...sectionData];
+        if (newNotes[index] && newNotes[index][subSection]) {
+            newNotes[index][subSection][noteIndex] = { ...(newNotes[index][subSection][noteIndex] || {}), text: value };
+        }
         setResumeData({
             ...resumeData,
             data: {
-                ...resumeData.data,
+                ...(resumeData?.data || {}),
                 [section]: newNotes,
             },
         });
     };
 
     const OnRemoveNoteItem = (noteIndex) => {
-        const newNotes = [...resumeData.data[section]];
-        newNotes[index][subSection].splice(noteIndex, 1);
+        const sectionData = resumeData?.data?.[section] || [];
+        const newNotes = [...sectionData];
+        if (newNotes[index] && newNotes[index][subSection]) {
+            newNotes[index][subSection].splice(noteIndex, 1);
+        }
         setResumeData({
             ...resumeData,
             data: {
-                ...resumeData.data,
+                ...(resumeData?.data || {}),
                 [section]: newNotes,
             },
         });
     };
 
     const OnAddNoteItem = () => {
-        const newNotes = [...resumeData.data[section]];
+        const sectionData = resumeData?.data?.[section] || [];
+        const newNotes = [...sectionData];
         const newNote = {
             text: "",
             isShownInPreview: true,
         };
+        if (!newNotes[index]) newNotes[index] = {};
+        if (!newNotes[index][subSection]) newNotes[index][subSection] = [];
         newNotes[index][subSection].push(newNote);
         setResumeData({
             ...resumeData,
             data: {
-                ...resumeData.data,
+                ...(resumeData?.data || {}),
                 [section]: newNotes,
             },
         });
     };
 
     const OnDisableNoteItem = (noteIndex) => {
-        const newNotes = [...resumeData.data[section]];
-        newNotes[index][subSection][noteIndex].isShownInPreview = !newNotes[index][subSection][noteIndex].isShownInPreview;
+        const sectionData = resumeData?.data?.[section] || [];
+        const newNotes = [...sectionData];
+        if (newNotes[index] && newNotes[index][subSection] && newNotes[index][subSection][noteIndex]) {
+            newNotes[index][subSection][noteIndex].isShownInPreview = !newNotes[index][subSection][noteIndex].isShownInPreview;
+        }
         setResumeData({
             ...resumeData,
             data: {
-                ...resumeData.data,
+                ...(resumeData?.data || {}),
                 [section]: newNotes,
             },
         });

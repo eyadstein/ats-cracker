@@ -34,7 +34,7 @@ const TextInput = ({
                     ref={(el) => {
                         globalRefs.current[name] = el;
                     }}
-                    value={value}
+                    value={value ?? ""}
                     onChange={onChange}
                     className="h-12 w-full appearance-none rounded-lg text-base leading-normal shadow-none outline-none md:text-[17px] font-sans m-0 placeholder-inputPlaceholder bg-inputBackground border border-solid border-inputBorder text-inputText p-2.5"
                     autoComplete="off"

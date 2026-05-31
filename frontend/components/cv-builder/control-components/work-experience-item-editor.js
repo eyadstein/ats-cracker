@@ -125,7 +125,7 @@ const WorkExperienceItemEditor = ({}) => {
                                                 onChange={(e) => {
                                                     const newWorkExperience = [...resumeData.data.workExperience];
                                                     newWorkExperience[index].isPartTime = e.target.checked;
-                                                    setResumeData({...resumeData, workExperience: newWorkExperience});
+                                                    setResumeData({...resumeData, data: {...resumeData.data, workExperience: newWorkExperience}});
                                                 }}
                                                 name="cvIsPartTime"
                                                 color="primary"
