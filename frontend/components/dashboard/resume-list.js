@@ -34,7 +34,7 @@ export const ResumeList = ({ ...props }) => {
         setLoading(false);
     };
 
-    useEffect(() => { fetchCvList(page); }, [page]);
+    useEffect(() => { fetch("/api/keepalive").catch(() => {}); fetchCvList(page); }, [page]);
 
     const handleWheel = (e) => {
         if (e.deltaY !== 0) { e.preventDefault(); e.currentTarget.scrollLeft += e.deltaY * 4; }
