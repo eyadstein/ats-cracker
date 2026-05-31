@@ -12,8 +12,11 @@ async function verifySession() {
     }
     try {
         const decoded = jwtDecode(cookies.value);
-        // Check expiration with 5-second buffer
-        if (!decoded?.exp || decoded.exp * 1000 < Date.now() - 5000) {
+        // Check expiration: exp is in seconds, Date.now() is in milliseconds
+        const nowMs = Date.now();
+        const expMs = (decoded?.exp || 0) * 1000;
+        // Allow 30-second clock skew buffer
+        if (!decoded?.exp || expMs < nowMs - 30000) {
             return null;
         }
         return decoded;
