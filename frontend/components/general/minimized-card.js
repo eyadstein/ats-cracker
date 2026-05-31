@@ -19,10 +19,7 @@ const MinimizedCard = ({
     const [isExpanded, setIsExpanded] = useState(IsCardExpanded);
     const inputRef = useRef();
     const {setResumeData,globalRefs} = useAppContext();
-    const [titleState, setTitlesState] = useState(canHaveOnBackMinimize ?
-        item.data.titles[titleSection]
-        : titleSection
-    );
+    const [titleState, setTitlesState] = useState(canHaveOnBackMinimize ? (item?.data?.titles?.[titleSection] || titleSection || "") : (titleSection || ""));
     const {lastControlPanel} = useAppContext();
 
 
