@@ -56,7 +56,7 @@ const EducationItemEditor = ({}) => {
 
     const onChangeInput = (e) => {
         const inputName = e.target.name.slice(2);
-        const camelCaseInputName = inputName.charAt(0).toLowerCase() + inputName.slice(1);
+        const camelCaseInputName = inputName ? inputName.charAt(0).toLowerCase() + inputName.slice(1) : "";
         const newEducations = [...resumeData.data.educations];
         newEducations[index][camelCaseInputName] = e.target.value;
         setResumeData({

@@ -56,7 +56,7 @@ const CertificationItemEditor = ({}) => {
 
     const onChangeInput = (e) => {
         const inputName = e.target.name.slice(2);
-        const camelCaseInputName = inputName.charAt(0).toLowerCase() + inputName.slice(1);
+        const camelCaseInputName = inputName ? inputName.charAt(0).toLowerCase() + inputName.slice(1) : "";
         const newCertifications = [...resumeData.data.courses];
         newCertifications[index][camelCaseInputName] = e.target.value;
         setResumeData({

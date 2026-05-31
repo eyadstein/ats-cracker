@@ -11,8 +11,15 @@ export const metadata = {
 export default function RootLayout({ children }) {
     return (
         <html lang="en">
-        <body style={{ margin: 0, minHeight: "100vh", background: "#f5f3ff" }}>
-        <div className={`${geistSans.variable} ${geistMono.variable} antialiased relative flex min-h-screen w-full flex-col`}>
+        <body>
+        <style>{`
+            body {
+                margin: 0;
+                min-height: 100vh;
+                background: linear-gradient(160deg, #f8f7ff 0%, #ede9fe 40%, #e0e7ff 100%) !important;
+            }
+        `}</style>
+        <div className={`${geistSans.variable} ${geistMono.variable} relative flex min-h-screen w-full flex-col`}>
             <AppProvider>
                 <DashBoardHeader />
                 {children}
