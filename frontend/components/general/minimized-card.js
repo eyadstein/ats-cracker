@@ -34,7 +34,7 @@ export default function MinimizedCard({id, name, completion, date, onUpdate}) {
         month: 'short',
         day: 'numeric',
         year: 'numeric'
-    }
+    });
 
     return (
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden transition-all hover:shadow-md">
@@ -98,4 +98,3 @@ export default function MinimizedCard({id, name, completion, date, onUpdate}) {
         </div>
     );
 }
-
