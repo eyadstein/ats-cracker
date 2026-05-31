@@ -1,13 +1,11 @@
 'use client';
 
 import { AddIcon, LoadMoreIcon } from "@/components/svgs/svgs";
-import EmptyCvBox from "@/components/dashboard/empty-cv-box";
 import useAppContext from "@/hooks/useAppContext";
 import { useEffect, useRef, useState } from "react";
 import { cvListAction } from "@/actions/cvs";
-import Link from "next/link";
 import { redirect } from "next/navigation";
-import ResumeContainer, { ListContainer, ResumePreview } from "@/components/cv-builder/reviewer/resume-preview";
+import { ListContainer, ResumePreview } from "@/components/cv-builder/reviewer/resume-preview";
 import { ControlPanelView } from "@/components/cv-builder/control-components/utils/enums";
 import { motion } from "framer-motion";
 
@@ -24,16 +22,9 @@ export const ResumeList = ({ ...props }) => {
             setLoading(true);
             setFetchError(false);
             const res = await cvListAction({ page: currentPage });
-            if (!res.success) {
-                setFetchError(true);
-                setLoading(false);
-                return;
-            }
-            if (currentPage === 1) {
-                setResumeList(res.cvList.results);
-            } else {
-                setResumeList((prev) => [...prev, ...res.cvList.results]);
-            }
+            if (!res.success) { setFetchError(true); setLoading(false); return; }
+            if (currentPage === 1) setResumeList(res.cvList.results);
+            else setResumeList((prev) => [...prev, ...res.cvList.results]);
             setNextPage(res.cvList.next);
             setControlPanelIndex(ControlPanelView.MainView);
         } catch (error) {
@@ -45,25 +36,9 @@ export const ResumeList = ({ ...props }) => {
 
     useEffect(() => { fetchCvList(page); }, [page]);
 
-    const loadMoreCv = () => { if (nextPage) setPage((p) => p + 1); };
-
-    const onClickNewCv = () => {
-        setResumeData({ ...defaultCv });
-        redirect("/dashboard/cvnew");
-    };
-
-    const onClickEditCv = (cv) => {
-        setResumeData(cv);
-        redirect(`/dashboard/${cv.id}`);
-    };
-
     const handleWheel = (e) => {
-        if (e.deltaY !== 0) {
-            e.preventDefault();
-            e.currentTarget.scrollLeft += e.deltaY * 4;
-        }
+        if (e.deltaY !== 0) { e.preventDefault(); e.currentTarget.scrollLeft += e.deltaY * 4; }
     };
-
     useEffect(() => {
         const container = containerRef.current;
         if (!container) return;
@@ -71,79 +46,82 @@ export const ResumeList = ({ ...props }) => {
         return () => container.removeEventListener("wheel", handleWheel);
     }, []);
 
-    const cardVariants = {
-        hidden: { opacity: 0, y: 30, scale: 0.95 },
-        visible: (i) => ({
-            opacity: 1, y: 0, scale: 1,
-            transition: { delay: i * 0.08, duration: 0.4, ease: "easeOut" },
-        }),
-    };
-
-    if (fetchError) {
-        return (
-            <div className="dbpx mt-8">
-                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-                    className="flex flex-col items-center justify-center py-16 rounded-2xl border border-dashed border-gray-200 text-center gap-4">
-                    <div className="text-5xl">⚠️</div>
-                    <p className="text-gray-500 font-semibold">Could not load resumes</p>
-                    <p className="text-gray-400 text-sm max-w-xs">The server may be starting up. Please wait a moment and try again.</p>
-                    <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
-                        onClick={() => fetchCvList(1)}
-                        className="mt-2 px-5 py-2.5 bg-gradient-to-r from-violet-600 to-indigo-600 text-white text-sm font-bold rounded-xl">
-                        Retry
-                    </motion.button>
-                </motion.div>
-            </div>
-        );
-    }
+    if (fetchError) return (
+        <div className="p-8">
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
+                className="flex flex-col items-center justify-center py-16 rounded-2xl border-2 border-dashed border-gray-200 text-center gap-4">
+                <div className="text-5xl">⚠️</div>
+                <p className="text-gray-600 font-bold text-lg">Could not load resumes</p>
+                <p className="text-gray-400 text-sm max-w-xs">The server may be waking up. Please wait a moment and retry.</p>
+                <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
+                    onClick={() => fetchCvList(1)}
+                    className="px-6 py-2.5 bg-gradient-to-r from-violet-600 to-indigo-600 text-white text-sm font-bold rounded-xl shadow">
+                    Retry
+                </motion.button>
+            </motion.div>
+        </div>
+    );
 
     return (
         <div {...props}>
-            <div className="xl:dbpx relative h-auto w-full max-w-full z-10">
-                <div
-                    ref={containerRef}
-                    className="dbpx h-auto w-full overflow-x-auto scroll-smooth xl:px-0 grid max-w-full auto-cols-min grid-flow-col gap-4 lg:min-w-0 p-8 scrollbar-thin scrollbar-thumb-gray-500 scrollbar-track-gray-200"
-                >
-                    <motion.button onClick={onClickNewCv}
-                        className="flex appearance-none flex-col items-center hover:opacity-70 lg:flex z-10"
-                        initial={{ opacity: 0, scale: 0.9 }} whileInView={{ opacity: 1, scale: 1 }}
-                        viewport={{ once: true }} transition={{ duration: 0.3 }} whileHover={{ scale: 1.05 }}>
-                        <div className="h-[254px] lg:w-38 flex w-38 items-center justify-center rounded-md border-2 border-dashed border-white">
-                            <AddIcon />
-                        </div>
-                        <span className="mt-[10px] text-xs font-bold uppercase">Add resume</span>
-                    </motion.button>
-
-                    {resumeList.map((cv, index) => (
-                        <motion.div key={index} custom={index} initial="hidden"
-                            whileInView="visible" viewport={{ once: true }} variants={cardVariants}
-                            whileHover={{ scale: 1.05, y: -5 }} transition={{ type: "spring", stiffness: 300 }}>
-                            <ListContainer cv={{ title: cv.title }}
-                                className="hover:scale-105 transition-transform z-10"
-                                onClick={() => onClickEditCv(cv)}>
-                                <ResumePreview data={cv} isListItemPreview={true} />
-                            </ListContainer>
-                        </motion.div>
-                    ))}
-
-                    {loading && (
-                        <div className="flex justify-center items-center w-full h-[254px] ml-10 z-10">
-                            <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-primaryBlack" />
-                        </div>
-                    )}
-
-                    {nextPage && !loading && (
-                        <motion.div onClick={loadMoreCv}
-                            className="flex appearance-none flex-col items-center hover:opacity-70 lg:flex z-10 cursor-pointer"
-                            initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}
-                            whileHover={{ scale: 1.05 }}>
-                            <div className="h-[254px] lg:w-38 flex w-38 items-center justify-center rounded-md border-2 border-dashed border-white">
-                                <LoadMoreIcon />
+            <div
+                ref={containerRef}
+                className="w-full overflow-x-auto scroll-smooth grid auto-cols-min grid-flow-col gap-5 p-8 scrollbar-thin scrollbar-thumb-violet-300 scrollbar-track-gray-100"
+            >
+                {/* Add New */}
+                <motion.button
+                    onClick={() => { setResumeData({ ...defaultCv }); redirect("/dashboard/cvnew"); }}
+                    className="flex flex-col items-center gap-3 group"
+                    initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
+                    whileHover={{ scale: 1.05 }} transition={{ duration: 0.3 }}>
+                    <div className="h-[254px] w-[180px] flex items-center justify-center rounded-2xl border-2 border-dashed border-violet-300 bg-violet-50 group-hover:border-violet-500 group-hover:bg-violet-100 transition-all">
+                        <div className="flex flex-col items-center gap-2">
+                            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-violet-500 to-indigo-500 flex items-center justify-center shadow-lg">
+                                <AddIcon />
                             </div>
-                            <span className="mt-[10px] text-xs font-bold uppercase">Load More</span>
-                        </motion.div>
-                    )}
-                </div>
+                            <span className="text-violet-600 font-bold text-sm">New Resume</span>
+                        </div>
+                    </div>
+                </motion.button>
+
+                {/* Resume Cards */}
+                {resumeList.map((cv, index) => (
+                    <motion.div key={index}
+                        initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.08 }}
+                        whileHover={{ scale: 1.03, y: -4 }}
+                        className="cursor-pointer"
+                        onClick={() => { setResumeData(cv); redirect(`/dashboard/${cv.id}`); }}>
+                        <div className="h-[254px] w-[180px] rounded-2xl border-2 border-gray-200 bg-white shadow-sm overflow-hidden hover:border-violet-400 hover:shadow-md transition-all relative">
+                            <div className="absolute inset-0 scale-[0.6] origin-top-left pointer-events-none">
+                                <ResumePreview data={cv} isListItemPreview={true} />
+                            </div>
+                            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-white via-white/90 to-transparent pt-8 pb-3 px-3">
+                                <p className="text-xs font-bold text-gray-800 truncate">{cv.title || "Untitled"}</p>
+                                <p className="text-[10px] text-gray-400">Resume</p>
+                            </div>
+                        </div>
+                    </motion.div>
+                ))}
+
+                {loading && (
+                    <div className="flex justify-center items-center h-[254px] w-[180px]">
+                        <div className="w-10 h-10 rounded-full border-4 border-violet-200 border-t-violet-600 animate-spin" />
+                    </div>
+                )}
+
+                {nextPage && !loading && (
+                    <motion.button onClick={() => setPage(p => p + 1)}
+                        className="flex flex-col items-center gap-3 group"
+                        whileHover={{ scale: 1.05 }}>
+                        <div className="h-[254px] w-[180px] flex items-center justify-center rounded-2xl border-2 border-dashed border-gray-300 bg-gray-50 group-hover:border-violet-400 group-hover:bg-violet-50 transition-all">
+                            <div className="flex flex-col items-center gap-2">
+                                <LoadMoreIcon />
+                                <span className="text-gray-500 font-bold text-xs">Load More</span>
+                            </div>
+                        </div>
+                    </motion.button>
+                )}
             </div>
         </div>
     );
