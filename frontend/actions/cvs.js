@@ -12,8 +12,8 @@ async function verifySession() {
     }
     try {
         const decoded = jwtDecode(cookies.value);
-        // Check expiration
-        if (!decoded?.exp || decoded.exp * 1000 < Date.now()) {
+        // Check expiration with 5-second buffer
+        if (!decoded?.exp || decoded.exp * 1000 < Date.now() - 5000) {
             return null;
         }
         return decoded;
@@ -28,7 +28,6 @@ function sanitizeKeys(obj) {
     if (Array.isArray(obj)) return obj.map(sanitizeKeys);
     const sanitized = {};
     for (const key of Object.keys(obj)) {
-        // Skip prototype pollution keys
         if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
             continue;
         }
@@ -38,12 +37,11 @@ function sanitizeKeys(obj) {
 }
 
 export async function cvListAction(formData) {
+    const session = await verifySession();
+    if (!session) {
+        redirect('/');
+    }
     try {
-        const session = await verifySession();
-        if (!session) {
-            redirect('/');
-            return { message: "An Error Occurred, Please try again", success: false };
-        }
         const cookies = await getAccessToken();
         const cvList = await ThirdParty.GetCvList(cookies.value, formData.page);
         return {
@@ -51,19 +49,18 @@ export async function cvListAction(formData) {
             cvList
         }
     } catch (error) {
-        console.error(error);
+        console.error('cvListAction error:', error);
+        return { message: "An Error Occurred, Please try again", success: false };
     }
-    return { message: "An Error Occurred, Please try again", success: false };
 }
 
 export async function cvCreateUpdate(cvData) {
+    const session = await verifySession();
+    if (!session) {
+        redirect('/');
+    }
     try {
-        const session = await verifySession();
-        if (!session) {
-            redirect('/');
-            return { message: "An Error Occurred, Please try again", success: false };
-        }
-        // Validate cvData structure to prevent prototype pollution
+        // Validate cvData structure
         if (!cvData || typeof cvData !== 'object') {
             return { message: "Invalid data format", success: false };
         }
@@ -75,19 +72,18 @@ export async function cvCreateUpdate(cvData) {
             response
         }
     } catch (error) {
-        console.error(error);
+        console.error('cvCreateUpdate error:', error);
+        return { message: "An Error Occurred, Please try again", success: false };
     }
-    return { message: "An Error Occurred, Please try again", success: false };
 }
 
 export async function cvGetAction(cvId) {
+    const session = await verifySession();
+    if (!session) {
+        redirect('/');
+    }
     try {
-        const session = await verifySession();
-        if (!session) {
-            redirect('/');
-            return { message: "An Error Occurred, Please try again", success: false };
-        }
-        // Validate cvId is a valid ID format (prevent injection)
+        // Validate cvId
         if (!cvId || !/^[a-zA-Z0-9_-]+$/.test(String(cvId))) {
             return { message: "Invalid CV ID", success: false };
         }
@@ -98,7 +94,7 @@ export async function cvGetAction(cvId) {
             cv
         }
     } catch (error) {
-        console.error(error);
+        console.error('cvGetAction error:', error);
+        return { message: "An Error Occurred, Please try again", success: false };
     }
-    return { message: "An Error Occurred, Please try again", success: false };
 }

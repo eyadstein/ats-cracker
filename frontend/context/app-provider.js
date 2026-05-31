@@ -29,13 +29,19 @@ const AppProvider = ({ children }) => {
         setSaveStatus("saving");
         try {
             const response = await cvCreateUpdate(data);
-            if (response.success && resumeData?.id === 'new') {
-                setResumeDataRaw({ ...response.response });
+            if (!response.success) {
+                throw new Error(response.message || "Save failed");
+            }
+            // Update ID when creating new CV — check for both 'new' and 'cvnew'
+            const isNewCv = data?.id === 'new' || data?.id === 'cvnew';
+            if (isNewCv && response.response?.id) {
+                setResumeDataRaw(prev => ({ ...prev, id: response.response.id }));
             }
             setSaveStatus("saved");
             if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
             saveTimerRef.current = setTimeout(() => setSaveStatus("idle"), 2500);
-        } catch {
+        } catch (error) {
+            console.error("syncResumeData error:", error);
             setSaveStatus("error");
             if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
             saveTimerRef.current = setTimeout(() => setSaveStatus("idle"), 3000);
@@ -43,7 +49,7 @@ const AppProvider = ({ children }) => {
     };
 
     const defaultCv = {
-        id: 'new', name: 'New CV',
+        id: 'cvnew', name: 'New CV',
         data: {
             name: '', position: '', contactInformation: '', email: '',
             address: '', socialMedia: [], summary: [], educations: [],
@@ -57,7 +63,6 @@ const AppProvider = ({ children }) => {
         }
     };
 
-    // SECURITY FIX: Prevent prototype pollution
     const sanitizeKeys = (obj) => {
         if (obj === null || typeof obj !== 'object') return obj;
         if (Array.isArray(obj)) return obj.map(sanitizeKeys);
@@ -96,7 +101,6 @@ const AppProvider = ({ children }) => {
                 },
             }
         };
-        // Sanitize to prevent prototype pollution
         const sanitized = sanitizeKeys(merged);
         setResumeDataRaw(sanitized);
         return sanitized;
@@ -113,10 +117,11 @@ const AppProvider = ({ children }) => {
     };
 
     const updateResumeData = (newData) => setResumeDataRaw(newData);
+    
     const OnEditSectionTitle = (e, section) => {
         const value = e.target.innerText;
-        const updatedTitles = {...(resumeData?.titles || {}), [section]: value};
-        setResumeDataRaw({...resumeData, titles: updatedTitles});
+        const updatedTitles = {...(resumeData?.data?.titles || {}), [section]: value};
+        setResumeDataRaw({...resumeData, data: {...(resumeData?.data || {}), titles: updatedTitles}});
     };
 
     const checkAuthStatus = () => {
