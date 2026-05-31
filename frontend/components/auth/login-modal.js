@@ -6,7 +6,9 @@ import { showErrorAlert } from "@/lib/alerts";
 import useAppContext from "@/hooks/useAppContext";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
-const GITHUB_CLIENT_ID = process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID;
+// OAuth client IDs are public by design — they go in the URL visible to users
+// The actual secret (client_secret) stays on the backend only
+const GITHUB_CLIENT_ID = process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID || "Ov23liOotRANg0xO7IPc";
 const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
 const MICROSOFT_CLIENT_ID = process.env.NEXT_PUBLIC_MICROSOFT_CLIENT_ID;
 
@@ -68,10 +70,6 @@ export default function LoginModal({ onChangeModal, closeModal }) {
     };
 
     const githubLogin = () => {
-        if (!GITHUB_CLIENT_ID) {
-            showErrorAlert("GitHub OAuth not configured.");
-            return;
-        }
         const state = generateState();
         sessionStorage.setItem('oauth_state', state);
         const url = `https://github.com/login/oauth/authorize?client_id=${GITHUB_CLIENT_ID}&scope=user:email&state=${state}`;
