@@ -98,3 +98,4 @@ export default function MinimizedCard({id, name, completion, date, onUpdate}) {
         </div>
     );
 }
+

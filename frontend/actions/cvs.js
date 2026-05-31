@@ -12,10 +12,8 @@ async function verifySession() {
     }
     try {
         const decoded = jwtDecode(cookies.value);
-        // Check expiration: exp is in seconds, Date.now() is in milliseconds
         const nowMs = Date.now();
         const expMs = (decoded?.exp || 0) * 1000;
-        // Allow 30-second clock skew buffer
         if (!decoded?.exp || expMs < nowMs - 30000) {
             return null;
         }
@@ -25,7 +23,6 @@ async function verifySession() {
     }
 }
 
-// Helper to prevent prototype pollution
 function sanitizeKeys(obj) {
     if (obj === null || typeof obj !== 'object') return obj;
     if (Array.isArray(obj)) return obj.map(sanitizeKeys);
@@ -63,7 +60,6 @@ export async function cvCreateUpdate(cvData) {
         redirect('/');
     }
     try {
-        // Validate cvData structure
         if (!cvData || typeof cvData !== 'object') {
             return { message: "Invalid data format", success: false };
         }
@@ -86,7 +82,6 @@ export async function cvGetAction(cvId) {
         redirect('/');
     }
     try {
-        // Validate cvId
         if (!cvId || !/^[a-zA-Z0-9_-]+$/.test(String(cvId))) {
             return { message: "Invalid CV ID", success: false };
         }
@@ -98,6 +93,27 @@ export async function cvGetAction(cvId) {
         }
     } catch (error) {
         console.error('cvGetAction error:', error);
+        return { message: "An Error Occurred, Please try again", success: false };
+    }
+}
+
+export async function deleteCv(cvId) {
+    const session = await verifySession();
+    if (!session) {
+        redirect('/');
+    }
+    try {
+        if (!cvId || !/^[a-zA-Z0-9_-]+$/.test(String(cvId))) {
+            return { message: "Invalid CV ID", success: false };
+        }
+        const cookies = await getAccessToken();
+        const response = await ThirdParty.DeleteCv(cookies.value, cvId);
+        return {
+            success: true,
+            response
+        }
+    } catch (error) {
+        console.error('deleteCv error:', error);
         return { message: "An Error Occurred, Please try again", success: false };
     }
 }
