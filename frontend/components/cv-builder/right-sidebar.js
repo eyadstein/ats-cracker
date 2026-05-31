@@ -423,7 +423,7 @@ export default function RightSidebar() {
                     await safeSetResume(parsed);
                 } else if (file.name.endsWith(".pdf")) {
                     // SECURITY FIX: Use npm package instead of CDN
-                    const pdfjsLib = await import('pdfjs-dist/legacy/build/pdf.js');
+                    const pdfjsLib = await import('pdfjs-dist');
                     const pdf = await pdfjsLib.getDocument({ data: await file.arrayBuffer() }).promise;
                     let text = "";
                     for (let i = 1; i <= pdf.numPages; i++) {
@@ -494,3 +494,4 @@ export default function RightSidebar() {
         </div>
     );
 }
+
