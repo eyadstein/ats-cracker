@@ -2,7 +2,7 @@ import React, {useState} from 'react';
 import {FaChevronDown, FaChevronUp, FaTrash, FaPen} from 'react-icons/fa';
 import {deleteCv} from "@/actions/cvs";
 import {useRouter} from "next/navigation";
-import {showConfirmAlert} from "@/lib/alerts";
+import {showErrorAlert} from "@/lib/alerts";
 
 // Helper to capitalize first letter (replaces .capitalize())
 const capitalize = (str) => {
@@ -17,12 +17,12 @@ export default function MinimizedCard({id, name, completion, date, onUpdate}) {
     const router = useRouter();
 
     const handleDelete = async () => {
-        showConfirmAlert("Are you sure you want to delete this CV?", async () => {
+        if (confirm("Are you sure you want to delete this CV?")) {
             const response = await deleteCv(id);
             if (response.success) {
                 onUpdate();
             }
-        });
+        }
     };
 
     const handleSave = async () => {
@@ -34,7 +34,7 @@ export default function MinimizedCard({id, name, completion, date, onUpdate}) {
         month: 'short',
         day: 'numeric',
         year: 'numeric'
-    });
+    }
 
     return (
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden transition-all hover:shadow-md">
@@ -98,3 +98,4 @@ export default function MinimizedCard({id, name, completion, date, onUpdate}) {
         </div>
     );
 }
+
